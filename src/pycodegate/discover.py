@@ -23,6 +23,7 @@ def discover_project(project_path: str) -> ProjectInfo:
         test_framework=_detect_test_framework(deps),
         has_type_hints=_detect_type_hints(root),
         source_file_count=len(find_python_files(project_path)),
+        frameworks=_detect_frameworks(deps),
     )
 
 
@@ -74,6 +75,32 @@ def _detect_framework(deps: set[str]) -> str | None:
     if "flask" in deps:
         return "flask"
     return None
+
+
+def _detect_frameworks(deps: set[str]) -> list[str]:
+    """Detect all frameworks and libraries present in project dependencies."""
+    found: list[str] = []
+    if "django" in deps or "django-rest-framework" in deps or "djangorestframework" in deps:
+        found.append("django")
+    if "fastapi" in deps:
+        found.append("fastapi")
+    if "flask" in deps:
+        found.append("flask")
+    if "pydantic" in deps:
+        found.append("pydantic")
+    if "sqlalchemy" in deps:
+        found.append("sqlalchemy")
+    if "celery" in deps:
+        found.append("celery")
+    if "requests" in deps or "httpx" in deps:
+        found.append("requests")
+    if "pandas" in deps:
+        found.append("pandas")
+    if "pytest" in deps:
+        found.append("pytest")
+    if "numpy" in deps:
+        found.append("numpy")
+    return found
 
 
 def _detect_package_manager(root: Path) -> str | None:

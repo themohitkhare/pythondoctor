@@ -32,7 +32,7 @@ class ImportsRules:
             return
         file_map[module_name] = filepath
 
-        for node in ast.walk(tree):
+        for node in ast.iter_child_nodes(tree):
             if isinstance(node, ast.Import):
                 for alias in node.names:
                     graph[module_name].add(alias.name)

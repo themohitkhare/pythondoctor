@@ -40,7 +40,7 @@ def scan_project(
         profile = detect_profile(project_path)
 
     files = _resolve_files(project_path, diff_base)
-    all_diags = _run_checks(files, project.framework, project_path, config)
+    all_diags = _run_checks(files, project.frameworks, project_path, config)
     all_diags = _apply_filters(all_diags, config, project_path, profile.suppressed_rules)
     max_deduction_overrides = _build_max_deduction_overrides(
         profile.max_deduction_overrides, config.max_deduction
@@ -68,14 +68,14 @@ def _resolve_files(project_path: str, diff_base: str | None) -> list[Path]:
 
 def _run_checks(
     files: list[Path],
-    framework: str | None,
+    frameworks: list[str],
     project_path: str,
     config: Config,
 ) -> list[Diagnostic]:
     """Run lint + dead code + imports + structure + dependency checks in parallel."""
     str_files = [str(f) for f in files]
     with ThreadPoolExecutor(max_workers=5) as executor:
-        lint_future = executor.submit(_run_lint, files, framework, config) if config.lint else None
+        lint_future = executor.submit(_run_lint, files, frameworks, config) if config.lint else None
         dead_code_future = (
             executor.submit(_run_dead_code, project_path, config) if config.dead_code else None
         )
@@ -162,11 +162,11 @@ def _matches_ignore(file_path: str, patterns: list[str], root: Path) -> bool:
 
 def _run_lint(
     files: list[Path],
-    framework: str | None,
+    frameworks: list[str],
     config: Config,
 ) -> list[Diagnostic]:
     """Run all rule sets against all files."""
-    rule_sets = get_all_rule_sets() + get_framework_rules(framework)
+    rule_sets = get_all_rule_sets() + get_framework_rules(frameworks)
     diags: list[Diagnostic] = []
 
     for file_path in files:

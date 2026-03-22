@@ -21,6 +21,14 @@ class Category(str, Enum):
     DJANGO = "Django"
     FASTAPI = "FastAPI"
     FLASK = "Flask"
+    PYDANTIC = "Pydantic"
+    SQLALCHEMY = "SQLAlchemy"
+    CELERY = "Celery"
+    REQUESTS = "Requests"
+    LOGGING = "Logging"
+    PANDAS = "Pandas"
+    PYTEST = "Pytest"
+    NUMPY = "NumPy"
     STRUCTURE = "Structure"
     IMPORTS = "Imports"
     DEPENDENCIES = "Dependencies"
@@ -48,6 +56,7 @@ class ProjectInfo:
     test_framework: str | None
     has_type_hints: bool
     source_file_count: int
+    frameworks: list[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True)

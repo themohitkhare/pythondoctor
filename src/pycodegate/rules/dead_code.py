@@ -10,6 +10,7 @@ except ImportError:
     vulture = None  # type: ignore[assignment]
 
 from pycodegate.types import Category, Diagnostic, Severity
+from pycodegate.utils.file_discovery import IGNORE_DIRS
 
 
 class DeadCodeRules:
@@ -23,11 +24,13 @@ class DeadCodeRules:
         v = vulture.Vulture()
 
         py_files = list(Path(project_path).rglob("*.py"))
-        ignore = {".venv", "venv", "node_modules", "__pycache__", ".git", "dist", "build"}
         py_files = [
             f
             for f in py_files
-            if not any(part in ignore for part in f.relative_to(project_path).parts)
+            if not any(
+                part in IGNORE_DIRS or part.endswith(".egg-info")
+                for part in f.relative_to(project_path).parts
+            )
         ]
 
         if not py_files:

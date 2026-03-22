@@ -29,4 +29,12 @@ FRAMEWORK_CATEGORY_MAP: dict = {
     Category.DJANGO: Category.SECURITY,
     Category.FASTAPI: Category.CORRECTNESS,
     Category.FLASK: Category.SECURITY,
+    Category.PYDANTIC: Category.CORRECTNESS,
+    Category.SQLALCHEMY: Category.SECURITY,
+    Category.CELERY: Category.CORRECTNESS,
+    Category.REQUESTS: Category.SECURITY,
+    Category.LOGGING: Category.CORRECTNESS,
+    Category.PANDAS: Category.CORRECTNESS,
+    Category.PYTEST: Category.CORRECTNESS,
+    Category.NUMPY: Category.CORRECTNESS,
 }
