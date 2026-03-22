@@ -1,11 +1,11 @@
-<h1 align="center">Py Gate</h1>
+<h1 align="center">PyCodeGate</h1>
 <p align="center">
   <strong>One command. One score. Your Python quality gate.</strong>
 </p>
 <p align="center">
   <a href="https://github.com/themohitkhare/pycodegate/actions/workflows/ci.yml"><img src="https://github.com/themohitkhare/pycodegate/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://pypi.org/project/py-gate/"><img src="https://img.shields.io/pypi/v/py-gate" alt="PyPI"></a>
-  <a href="https://pypi.org/project/py-gate/"><img src="https://img.shields.io/pypi/pyversions/py-gate" alt="Python"></a>
+  <a href="https://pypi.org/project/pycodegate/"><img src="https://img.shields.io/pypi/v/pycodegate" alt="PyPI"></a>
+  <a href="https://pypi.org/project/pycodegate/"><img src="https://img.shields.io/pypi/pyversions/pycodegate" alt="Python"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
 </p>
 
@@ -13,7 +13,7 @@
 
 ## How it works
 
-Py Gate starts by detecting your project's context: framework (Django, FastAPI, Flask), Python version, package manager (uv, poetry, pip), and test framework. That context drives which rules are active — Django projects get SQL injection checks, FastAPI projects get async-correctness checks, and so on.
+PyCodeGate starts by detecting your project's context: framework (Django, FastAPI, Flask), Python version, package manager (uv, poetry, pip), and test framework. That context drives which rules are active — Django projects get SQL injection checks, FastAPI projects get async-correctness checks, and so on.
 
 It then runs two analysis passes **in parallel**: a lint pass that evaluates 40+ rules across 8 categories (Security, Correctness, Complexity, Architecture, Performance, Structure, Imports, Dead Code), and a dead-code pass powered by [Vulture](https://github.com/jendrikseipp/vulture) that finds unused functions, classes, imports, and variables.
 
@@ -24,39 +24,39 @@ Findings are filtered through your configuration and scored using a **weighted c
 Run instantly with `uvx` — no install needed:
 
 ```bash
-uvx py-gate .
+uvx pycodegate .
 ```
 
 Install globally with pipx or uv:
 
 ```bash
-pipx install py-gate
+pipx install pycodegate
 # or
-uv tool install py-gate
+uv tool install pycodegate
 # or
-pip install py-gate
+pip install pycodegate
 ```
 
 ## Quick Start
 
 ```bash
 # Basic scan — score + summary
-py-gate .
+pycodegate .
 
 # Show file paths and line numbers for every finding
-py-gate . --verbose
+pycodegate . --verbose
 
 # Machine-readable output for AI agents and CI
-py-gate . --json
+pycodegate . --json
 
 # Auto-fix ruff-fixable issues, then scan
-py-gate . --fix
+pycodegate . --fix
 
 # Output only the numeric score (useful in scripts)
-py-gate . --score
+pycodegate . --score
 
 # Scan only files changed vs a base branch
-py-gate . --diff main
+pycodegate . --diff main
 ```
 
 ## JSON Output
@@ -64,7 +64,7 @@ py-gate . --diff main
 Pass `--json` to get structured output that AI agents and CI pipelines can parse:
 
 ```bash
-py-gate . --json
+pycodegate . --json
 ```
 
 ```json
@@ -105,7 +105,7 @@ py-gate . --json
 
 ## Agent Integration
 
-Py Gate is designed to be used by AI coding agents. Add it to your agent's context so it runs after every Python change.
+PyCodeGate is designed to be used by AI coding agents. Add it to your agent's context so it runs after every Python change.
 
 ### Claude Code
 
@@ -113,18 +113,18 @@ Add the skill to your project:
 
 ```bash
 mkdir -p .claude/skills
-curl -fsSL https://raw.githubusercontent.com/themohitkhare/pycodegate/main/skills/py-gate/SKILL.md \
-  -o .claude/skills/py-gate.md
+curl -fsSL https://raw.githubusercontent.com/themohitkhare/pycodegate/main/skills/pycodegate/SKILL.md \
+  -o .claude/skills/pycodegate.md
 ```
 
 Or copy `AGENTS.md` to your project root — Claude Code picks it up automatically.
 
 ### Cursor
 
-Add to `.cursor/rules/py-gate.mdc`:
+Add to `.cursor/rules/pycodegate.mdc`:
 
 ```markdown
-After modifying Python files, run `uvx py-gate . --json` and fix all findings
+After modifying Python files, run `uvx pycodegate . --json` and fix all findings
 with severity "error" before marking the task complete. Target score: 80+.
 ```
 
@@ -133,7 +133,7 @@ with severity "error" before marking the task complete. Target score: 80+.
 Add to `.windsurfrules`:
 
 ```
-After modifying Python files, run: uvx py-gate . --json
+After modifying Python files, run: uvx pycodegate . --json
 Fix all "error" severity findings. Re-run to verify the score improved.
 ```
 
@@ -142,7 +142,7 @@ Fix all "error" severity findings. Re-run to verify the score improved.
 Add to your system prompt:
 
 ```
-After modifying Python files, run `uvx py-gate . --json` to check code quality.
+After modifying Python files, run `uvx pycodegate . --json` to check code quality.
 Fix errors first. Target score: 80+.
 ```
 
@@ -160,7 +160,7 @@ name: Quality Gate
 on: [push, pull_request]
 
 jobs:
-  py-gate:
+  pycodegate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -171,10 +171,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Run Py Gate
+      - name: Run PyCodeGate
         run: |
-          pip install py-gate
-          py-gate . --verbose --diff main --fail-on error
+          pip install pycodegate
+          pycodegate . --verbose --diff main --fail-on error
 ```
 
 ## CLI Reference
@@ -210,7 +210,7 @@ Framework-specific rules (Django, FastAPI, Flask) are mapped into the Security o
 
 ## Scoring
 
-Py Gate uses a **weighted category-budget system**:
+PyCodeGate uses a **weighted category-budget system**:
 
 1. Each category has a weight (see table above). Weights are normalized to sum to 100 points of total deduction budget.
 2. Within a category, findings are sorted by cost (errors cost more than warnings). The top 3 findings apply at full cost; every additional finding applies **diminishing returns** (10% of its cost).
@@ -226,7 +226,7 @@ Py Gate uses a **weighted category-budget system**:
 
 ## Configuration
 
-Create `py-gate.toml` in your project root:
+Create `pycodegate.toml` in your project root:
 
 ```toml
 [options]
@@ -250,27 +250,27 @@ max-deduction.Dead Code = 0  # disable dead-code penalty entirely
 Or use `pyproject.toml`:
 
 ```toml
-[tool.py-gate]
+[tool.pycodegate]
 lint = true
 dead_code = true
 fail_on = "error"
 
-[tool.py-gate.ignore]
+[tool.pycodegate.ignore]
 rules = ["no-import-in-function"]
 files = ["tests/fixtures/**"]
 
-[tool.py-gate.per-file-ignores]
+[tool.pycodegate.per-file-ignores]
 "src/legacy/*.py" = ["high-complexity"]
 
-[tool.py-gate.scoring]
+[tool.pycodegate.scoring]
 "max-deduction" = { Security = 20, "Dead Code" = 0 }
 ```
 
-If both files exist, `py-gate.toml` takes precedence. CLI flags always override config values.
+If both files exist, `pycodegate.toml` takes precedence. CLI flags always override config values.
 
 ## Profiles
 
-Py Gate auto-detects a project profile and adjusts rule weights accordingly. You can also set a profile explicitly in config (`profile = "library"`).
+PyCodeGate auto-detects a project profile and adjusts rule weights accordingly. You can also set a profile explicitly in config (`profile = "library"`).
 
 | Profile | Auto-detected when | Adjustments |
 |---------|--------------------|-------------|
@@ -281,10 +281,10 @@ Py Gate auto-detects a project profile and adjusts rule weights accordingly. You
 
 ## Pre-commit Hook
 
-Use `--pre-commit` to run Py Gate as a pre-commit hook. It automatically scans only the staged files:
+Use `--pre-commit` to run PyCodeGate as a pre-commit hook. It automatically scans only the staged files:
 
 ```bash
-py-gate . --pre-commit --fail-on error
+pycodegate . --pre-commit --fail-on error
 ```
 
 Add to `.pre-commit-config.yaml`:
@@ -293,9 +293,9 @@ Add to `.pre-commit-config.yaml`:
 repos:
   - repo: local
     hooks:
-      - id: py-gate
-        name: Py Gate quality check
-        entry: py-gate . --pre-commit --fail-on error
+      - id: pycodegate
+        name: PyCodeGate quality check
+        entry: pycodegate . --pre-commit --fail-on error
         language: system
         types: [python]
         pass_filenames: false
@@ -308,7 +308,7 @@ git clone https://github.com/themohitkhare/pycodegate
 cd pycodegate
 uv sync --all-extras
 uv run pytest -q
-uv run py-gate . --verbose  # dogfood it
+uv run pycodegate . --verbose  # dogfood it
 ```
 
 To add a new rule:

@@ -17,7 +17,7 @@ from pycodegate.utils.precommit import install_precommit_hook
 
 
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})
-@click.version_option(__version__, "-v", "--version", prog_name="Py Gate")
+@click.version_option(__version__, "-v", "--version", prog_name="PyCodeGate")
 @click.argument("directory", default=".", type=click.Path(exists=True))
 @click.option("--lint/--no-lint", default=True, help="Enable/disable lint checks.")
 @click.option(
@@ -79,7 +79,7 @@ def main(
     precommit: bool,
     min_score: int | None,
 ) -> None:
-    """Py Gate — Diagnose your Python project's health."""
+    """PyCodeGate — Diagnose your Python project's health."""
     if ci_workflow:
         click.echo(generate_ci_workflow(), nl=False)
         return
@@ -125,7 +125,7 @@ def main(
 
     if min_score is not None and result.score.value < min_score:
         click.echo(
-            f"py-gate: score {result.score.value} is below minimum {min_score}",
+            f"pycodegate: score {result.score.value} is below minimum {min_score}",
             err=True,
         )
         sys.exit(1)

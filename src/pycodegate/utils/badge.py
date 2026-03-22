@@ -17,7 +17,7 @@ def generate_badge(score: int, label: str) -> str:
         color = "red"
 
     score_text = urllib.parse.quote(f"{score}/100")
-    return f"![py-gate score](https://img.shields.io/badge/py--gate-{score_text}-{color})"
+    return f"![pycodegate score](https://img.shields.io/badge/py--gate-{score_text}-{color})"
 
 
 def generate_ci_workflow() -> str:
@@ -36,16 +36,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - run: uv tool install py-gate
-      - name: Run py-gate
+      - run: uv tool install pycodegate
+      - name: Run pycodegate
         run: |
-          SCORE=$(py-gate . --score)
-          BADGE=$(py-gate . --badge)
+          SCORE=$(pycodegate . --score)
+          BADGE=$(pycodegate . --badge)
           # Update badge in README
-          sed -i "s|!\\[py-gate score\\](.*)|${BADGE}|" README.md
+          sed -i "s|!\\[pycodegate score\\](.*)|${BADGE}|" README.md
       - name: Commit badge update
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git diff --quiet README.md || (git add README.md && git commit -m "chore: update py-gate score badge" && git push)
+          git diff --quiet README.md || (git add README.md && git commit -m "chore: update pycodegate score badge" && git push)
 """

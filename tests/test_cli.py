@@ -2,6 +2,7 @@ import json
 
 from click.testing import CliRunner
 
+from pycodegate import __version__
 from pycodegate.cli import main
 
 
@@ -9,14 +10,14 @@ def test_cli_help():
     runner = CliRunner()
     result = runner.invoke(main, ["--help"])
     assert result.exit_code == 0
-    assert "Py Gate" in result.output or "py-gate" in result.output
+    assert "PyCodeGate" in result.output or "pycodegate" in result.output
 
 
 def test_cli_version():
     runner = CliRunner()
     result = runner.invoke(main, ["--version"])
     assert result.exit_code == 0
-    assert "0.1.0" in result.output
+    assert __version__ in result.output
 
 
 def test_cli_scan_clean_project(tmp_path):
@@ -122,4 +123,4 @@ def test_ci_workflow(tmp_path):
     result = runner.invoke(main, [str(tmp_path), "--ci"])
     assert result.exit_code == 0
     assert "name: Py Gate Score" in result.output
-    assert "py-gate" in result.output
+    assert "pycodegate" in result.output

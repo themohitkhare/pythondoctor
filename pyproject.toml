@@ -1,6 +1,6 @@
 [project]
 name = "pycodegate"
-version = "0.1.1"
+version = "0.1.2"
 description = "One command. One score. Your Python quality gate."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -42,7 +42,7 @@ dev = [
 
 [project.scripts]
 pycodegate = "pycodegate.cli:main"
-py-gate = "pycodegate.cli:main"
+
 
 [build-system]
 requires = ["hatchling"]
@@ -70,6 +70,6 @@ ignore = ["SIM102"]  # nested ifs in AST walking are clearer than combined condi
 "src/pycodegate/rules/base.py" = ["TC001"]  # runtime import in abstract method
 "src/pycodegate/utils/*.py" = ["E501"]
 
-[tool.py-gate]
-[tool.py-gate.ignore]
+[tool.pycodegate]
+[tool.pycodegate.ignore]
 files = ["tests/fixtures/**"]

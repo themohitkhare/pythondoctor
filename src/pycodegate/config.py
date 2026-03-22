@@ -1,4 +1,4 @@
-"""Configuration loading for py-gate."""
+"""Configuration loading for pycodegate."""
 
 from __future__ import annotations
 
@@ -22,11 +22,11 @@ class Config:
 
 
 def load_config(project_path: str) -> Config:
-    """Load config from py-gate.toml or pyproject.toml [tool.py-gate]."""
+    """Load config from pycodegate.toml or pyproject.toml [tool.pycodegate]."""
     root = Path(project_path)
 
-    # py-gate.toml takes precedence
-    doctor_toml = root / "py-gate.toml"
+    # pycodegate.toml takes precedence
+    doctor_toml = root / "pycodegate.toml"
     if doctor_toml.exists():
         return _parse_doctor_toml(doctor_toml)
 
@@ -62,7 +62,7 @@ def _parse_pyproject_toml(path: Path) -> Config:
     with open(path, "rb") as f:
         data = tomllib.load(f)
 
-    section = data.get("tool", {}).get("py-gate", {})
+    section = data.get("tool", {}).get("pycodegate", {})
     if not section:
         return Config()
 

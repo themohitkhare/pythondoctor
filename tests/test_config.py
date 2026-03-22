@@ -22,7 +22,7 @@ dead_code = false
 verbose = true
 fail_on = "error"
 """
-    (tmp_path / "py-gate.toml").write_text(toml_content)
+    (tmp_path / "pycodegate.toml").write_text(toml_content)
     cfg = load_config(str(tmp_path))
     assert cfg.dead_code is False
     assert cfg.verbose is True
@@ -33,13 +33,13 @@ fail_on = "error"
 
 def test_load_from_pyproject_toml(tmp_path):
     toml_content = """
-[tool.py-gate]
+[tool.pycodegate]
 lint = true
 dead_code = true
 verbose = false
 fail_on = "none"
 
-[tool.py-gate.ignore]
+[tool.pycodegate.ignore]
 rules = ["no-pickle"]
 files = []
 """
@@ -50,12 +50,12 @@ files = []
 
 
 def test_pycodegate_toml_takes_precedence(tmp_path):
-    (tmp_path / "py-gate.toml").write_text("""
+    (tmp_path / "pycodegate.toml").write_text("""
 [options]
 verbose = true
 """)
     (tmp_path / "pyproject.toml").write_text("""
-[tool.py-gate]
+[tool.pycodegate]
 verbose = false
 """)
     cfg = load_config(str(tmp_path))
@@ -69,7 +69,7 @@ lint = true
 [per-file-suppress]
 "tests/*" = ["no-bare-except"]
 """
-    (tmp_path / "py-gate.toml").write_text(toml_content)
+    (tmp_path / "pycodegate.toml").write_text(toml_content)
     config = load_config(str(tmp_path))
     assert config.per_file_suppress == {"tests/*": ["no-bare-except"]}
 
@@ -82,16 +82,16 @@ lint = true
 security = 15
 structure = 5
 """
-    (tmp_path / "py-gate.toml").write_text(toml_content)
+    (tmp_path / "pycodegate.toml").write_text(toml_content)
     config = load_config(str(tmp_path))
     assert config.max_deduction == {"security": 15, "structure": 5}
 
 
 def test_per_file_suppress_from_pyproject(tmp_path):
-    pyproject = """[tool.py-gate.per-file-suppress]
+    pyproject = """[tool.pycodegate.per-file-suppress]
 "tests/*" = ["no-bare-except"]
 
-[tool.py-gate.max-deduction]
+[tool.pycodegate.max-deduction]
 security = 10
 """
     (tmp_path / "pyproject.toml").write_text(pyproject)

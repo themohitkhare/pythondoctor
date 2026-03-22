@@ -2,17 +2,17 @@
 
 ## Overview
 
-py-gate is a Python code quality gate that produces a 0–100 health score. It detects your framework, runs parallel lint and dead-code analysis across 40+ rules, and reports findings by severity so you always know what to fix first.
+pycodegate is a Python code quality gate that produces a 0–100 health score. It detects your framework, runs parallel lint and dead-code analysis across 40+ rules, and reports findings by severity so you always know what to fix first.
 
 ## Quick Start
 
 ```bash
-uvx py-gate . --json
+uvx pycodegate . --json
 ```
 
 ## For AI Agents
 
-Run `py-gate . --json` after modifying Python files. Fix findings with severity `"error"` first (security, correctness). Re-run to verify the score improved. Target: **80+**.
+Run `pycodegate . --json` after modifying Python files. Fix findings with severity `"error"` first (security, correctness). Re-run to verify the score improved. Target: **80+**.
 
 The JSON output includes the score, label, per-diagnostic severity and file location, and detected project context (framework, Python version, package manager).
 
@@ -38,7 +38,7 @@ The JSON output includes the score, label, per-diagnostic severity and file loca
 ```bash
 uv run pytest -q                              # run all tests
 uv run ruff check . && uv run ruff format --check .  # lint + format check
-uv run py-gate . --verbose                   # dogfood on ourselves
+uv run pycodegate . --verbose                   # dogfood on ourselves
 ```
 
 ## Adding Rules
@@ -56,7 +56,7 @@ src/pycodegate/
   api.py          — Programmatic API (diagnose function)
   scan.py         — Orchestrator: parallel lint + dead code
   score.py        — Score calculation from diagnostics
-  config.py       — Config loading (py-gate.toml / pyproject.toml)
+  config.py       — Config loading (pycodegate.toml / pyproject.toml)
   discover.py     — Project detection (framework, package manager, etc.)
   output.py       — Rich terminal output
   types.py        — All data types (Diagnostic, Score, etc.)

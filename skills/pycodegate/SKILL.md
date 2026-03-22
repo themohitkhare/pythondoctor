@@ -1,17 +1,17 @@
 ---
-name: py-gate
+name: pycodegate
 description: Run after making Python changes to catch issues early. Use when reviewing code, finishing a feature, or fixing bugs.
 version: 1.0.0
 ---
 
-# Py Gate
+# PyCodeGate
 
 Scans your Python codebase for security, performance, correctness, architecture, and structure issues. Outputs a 0-100 score with actionable diagnostics. Auto-detects Django, FastAPI, and Flask to activate framework-specific rules.
 
 ## Usage
 
 ```bash
-uvx py-gate . --verbose --diff
+uvx pycodegate . --verbose --diff
 ```
 
 ## Workflow

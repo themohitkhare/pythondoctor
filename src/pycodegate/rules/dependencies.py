@@ -81,7 +81,7 @@ class DependencyRules:
         # Try uv export
         if shutil.which("uv") and (path / "pyproject.toml").exists():
             try:
-                tmp = Path(tempfile.gettempdir()) / "py-gate-reqs.txt"
+                tmp = Path(tempfile.gettempdir()) / "pycodegate-reqs.txt"
                 result = subprocess.run(
                     [
                         "uv",

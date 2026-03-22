@@ -138,7 +138,9 @@ def print_scan_result(result: ScanResult, verbose: bool = False) -> None:
     # Project info header
     p = result.project
     console.print()
-    console.print("  [bold]Py Gate[/bold] — v0.1.0")
+    from pycodegate import __version__
+
+    console.print(f"  [bold]PyCodeGate[/bold] — v{__version__}")
     console.print()
     console.print(f"  [dim]Path:[/dim]            {p.path}")
     if p.python_version:
