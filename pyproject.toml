@@ -41,6 +41,7 @@ dev = [
 ]
 
 [project.scripts]
+pycodegate = "pycodegate.cli:main"
 py-gate = "pycodegate.cli:main"
 
 [build-system]
