@@ -1,3 +1,21 @@
+# AGENTS.md
+
+## Overview
+
+py-gate is a Python code quality gate that produces a 0–100 health score. It detects your framework, runs parallel lint and dead-code analysis across 40+ rules, and reports findings by severity so you always know what to fix first.
+
+## Quick Start
+
+```bash
+uvx py-gate . --json
+```
+
+## For AI Agents
+
+Run `py-gate . --json` after modifying Python files. Fix findings with severity `"error"` first (security, correctness). Re-run to verify the score improved. Target: **80+**.
+
+The JSON output includes the score, label, per-diagnostic severity and file location, and detected project context (framework, Python version, package manager).
+
 ## General Rules
 
 - MUST: Use `uv` for all Python operations. `uv run` to execute, `uv sync` to install.
@@ -15,21 +33,20 @@
 - MUST: Use early returns and guard clauses to reduce nesting depth below 5.
 - MUST: Keep functions under 50 lines.
 
+## Development
+
+```bash
+uv run pytest -q                              # run all tests
+uv run ruff check . && uv run ruff format --check .  # lint + format check
+uv run py-gate . --verbose                   # dogfood on ourselves
+```
+
 ## Adding Rules
 
 1. Create a new file in `src/python_doctor/rules/` extending `BaseRules`
 2. Implement `check(self, source: str, filename: str) -> list[Diagnostic]`
 3. Register in `src/python_doctor/rules/__init__.py`
 4. Add tests in `tests/rules/`
-
-## Testing
-
-Run checks before committing:
-
-```bash
-uv run pytest                # runs all tests
-uv run py-gate . -v    # dogfood on ourselves
-```
 
 ## Architecture
 

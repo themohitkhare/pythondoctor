@@ -1,90 +1,67 @@
-# py-gate
+<h1 align="center">Py Gate</h1>
+<p align="center">
+  <strong>One command. One score. Your Python quality gate.</strong>
+</p>
+<p align="center">
+  <a href="https://github.com/themohitkhare/pythondoctor/actions/workflows/ci.yml"><img src="https://github.com/themohitkhare/pythondoctor/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://pypi.org/project/py-gate/"><img src="https://img.shields.io/pypi/v/py-gate" alt="PyPI"></a>
+  <a href="https://pypi.org/project/py-gate/"><img src="https://img.shields.io/pypi/pyversions/py-gate" alt="Python"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
+</p>
 
-[![PyPI version](https://img.shields.io/pypi/v/py-gate?style=flat&colorA=000000&colorB=000000)](https://pypi.org/project/py-gate/)
-[![Downloads](https://img.shields.io/pypi/dm/py-gate?style=flat&colorA=000000&colorB=000000)](https://pypi.org/project/py-gate/)
-
-Diagnose your Python project's health. One command scans your codebase for security, performance, correctness, and architecture issues, then outputs a **0-100 score** with actionable diagnostics.
-
-Inspired by [react-doctor](https://github.com/millionco/react-doctor).
+---
 
 ## How it works
 
-Python Doctor detects your framework (Django, FastAPI, Flask), Python version, package manager (uv, poetry, pip), and test framework, then runs two analysis passes **in parallel**:
+Py Gate starts by detecting your project's context: framework (Django, FastAPI, Flask), Python version, package manager (uv, poetry, pip), and test framework. That context drives which rules are active — Django projects get SQL injection checks, FastAPI projects get async-correctness checks, and so on.
 
-1. **Lint**: Checks 30+ rules across security, performance, architecture, correctness, and framework-specific categories. Rules are toggled automatically based on your project setup.
-2. **Dead code**: Detects unused functions, classes, imports, and variables via [Vulture](https://github.com/jendrikseipp/vulture).
+It then runs two analysis passes **in parallel**: a lint pass that evaluates 40+ rules across 8 categories (Security, Correctness, Complexity, Architecture, Performance, Structure, Imports, Dead Code), and a dead-code pass powered by [Vulture](https://github.com/jendrikseipp/vulture) that finds unused functions, classes, imports, and variables.
 
-Diagnostics are filtered through your config, then scored by severity (errors weigh more than warnings) to produce a **0-100 health score** (75+ Great, 50-74 Needs Work, <50 Critical).
+Findings are filtered through your configuration and scored using a **weighted category-budget system**. Each category has a maximum deduction budget proportional to its weight. Within a category the top 3 findings apply at full cost; additional findings apply diminishing returns (10% each), so fixing the worst issues always moves the needle. The final result is a **0–100 health score** with a label: Excellent (90+), Great (75–89), Needs work (50–74), or Critical (<50).
 
 ## Install
 
-Run instantly with uvx (no install needed):
+Run instantly with `uvx` — no install needed:
 
 ```bash
 uvx py-gate .
 ```
 
-Or install globally:
+Install globally with pipx or uv:
 
 ```bash
+pipx install py-gate
+# or
 uv tool install py-gate
 # or
 pip install py-gate
 ```
 
-Use `--verbose` to see affected files and line numbers:
+## Quick Start
 
 ```bash
+# Basic scan — score + summary
+py-gate .
+
+# Show file paths and line numbers for every finding
 py-gate . --verbose
+
+# Machine-readable output for AI agents and CI
+py-gate . --json
+
+# Auto-fix ruff-fixable issues, then scan
+py-gate . --fix
+
+# Output only the numeric score (useful in scripts)
+py-gate . --score
+
+# Scan only files changed vs a base branch
+py-gate . --diff main
 ```
 
-## Install for your coding agent
+## JSON Output
 
-Add the skill to your Claude Code, Cursor, or other AI coding agent:
-
-```bash
-# Claude Code
-cp skills/py-gate/SKILL.md .claude/skills/py-gate.md
-```
-
-Or reference the AGENTS.md in your project root — it's automatically picked up by Claude Code, Cursor, Windsurf, and others.
-
-## GitHub Actions
-
-```yaml
-- uses: actions/checkout@v5
-  with:
-    fetch-depth: 0 # required for --diff
-- uses: actions/setup-python@v5
-  with:
-    python-version: "3.12"
-- name: Run Py Gate
-  run: |
-    pip install py-gate
-    py-gate . --verbose --diff main --fail-on error
-```
-
-## Options
-
-```
-Usage: py-gate [OPTIONS] [DIRECTORY]
-
-Options:
-  -v, --version                   Show the version and exit.
-  --lint / --no-lint              Enable/disable lint checks.
-  --dead-code / --no-dead-code    Enable/disable dead code detection.
-  --verbose                       Show file details per rule.
-  --score                         Output only the numeric score.
-  --json                          Structured JSON output (for AI agents).
-  --fix                           Auto-fix issues via ruff before scanning.
-  --diff TEXT                     Scan only files changed vs base branch.
-  --fail-on [error|warning|none]  Exit with code 1 on this severity level.
-  -h, --help                      Show this message and exit.
-```
-
-### JSON Output
-
-The `--json` flag returns machine-readable output that AI agents can parse:
+Pass `--json` to get structured output that AI agents and CI pipelines can parse:
 
 ```bash
 py-gate . --json
@@ -94,41 +71,162 @@ py-gate . --json
 {
   "version": "0.1.0",
   "path": ".",
-  "score": 98,
+  "score": 87,
   "label": "Great",
-  "errors": 0,
-  "warnings": 5,
-  "elapsed_ms": 177,
+  "errors": 1,
+  "warnings": 4,
+  "elapsed_ms": 212,
   "project": {
-    "framework": null,
-    "python_version": "3.10",
+    "framework": "fastapi",
+    "python_version": "3.12",
     "package_manager": "uv",
     "test_framework": "pytest"
   },
   "diagnostics": [
     {
+      "rule": "no-mutable-default",
+      "severity": "error",
+      "category": "Correctness",
+      "message": "Mutable default argument `[]` is shared across all calls",
+      "file_path": "src/api/routes.py",
+      "line": 34
+    },
+    {
       "rule": "high-complexity",
       "severity": "warning",
       "category": "Complexity",
-      "message": "Function 'process' has cyclomatic complexity 18 (max 15)",
-      "file_path": "src/engine.py",
-      "line": 45
+      "message": "Function 'process_order' has cyclomatic complexity 17 (max 15)",
+      "file_path": "src/api/orders.py",
+      "line": 88
     }
   ]
 }
 ```
 
-### Auto-Fix
+## Agent Integration
 
-Fix auto-fixable issues via ruff before scanning:
+Py Gate is designed to be used by AI coding agents. Add it to your agent's context so it runs after every Python change.
+
+### Claude Code
+
+Add the skill to your project:
 
 ```bash
-py-gate . --fix --verbose
+mkdir -p .claude/skills
+curl -fsSL https://raw.githubusercontent.com/themohitkhare/pythondoctor/main/skills/py-gate/SKILL.md \
+  -o .claude/skills/py-gate.md
 ```
+
+Or copy `AGENTS.md` to your project root — Claude Code picks it up automatically.
+
+### Cursor
+
+Add to `.cursor/rules/py-gate.mdc`:
+
+```markdown
+After modifying Python files, run `uvx py-gate . --json` and fix all findings
+with severity "error" before marking the task complete. Target score: 80+.
+```
+
+### Windsurf
+
+Add to `.windsurfrules`:
+
+```
+After modifying Python files, run: uvx py-gate . --json
+Fix all "error" severity findings. Re-run to verify the score improved.
+```
+
+### Codex
+
+Add to your system prompt:
+
+```
+After modifying Python files, run `uvx py-gate . --json` to check code quality.
+Fix errors first. Target score: 80+.
+```
+
+### Aider
+
+```bash
+aider --read AGENTS.md
+```
+
+## GitHub Actions
+
+```yaml
+name: Quality Gate
+
+on: [push, pull_request]
+
+jobs:
+  py-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # required for --diff
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run Py Gate
+        run: |
+          pip install py-gate
+          py-gate . --verbose --diff main --fail-on error
+```
+
+## CLI Reference
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `[DIRECTORY]` | `.` | Path to the Python project to scan |
+| `--lint / --no-lint` | on | Enable or disable lint checks |
+| `--dead-code / --no-dead-code` | on | Enable or disable dead code detection |
+| `--verbose` | off | Show file path and line number per finding |
+| `--score` | off | Print only the numeric score and exit |
+| `--json` | off | Emit structured JSON (for agents and CI) |
+| `--fix` | off | Run `ruff --fix` before scanning |
+| `--diff TEXT` | — | Scan only files changed vs this base branch |
+| `--fail-on [error\|warning\|none]` | `none` | Exit code 1 when findings at this level exist |
+| `-v, --version` | — | Show version and exit |
+| `-h, --help` | — | Show help and exit |
+
+## What It Checks
+
+| Category | Weight | Max Deduction | What it catches |
+|----------|--------|---------------|-----------------|
+| Security | 5 | ~24 pts | `eval`, `exec`, `pickle.load`, unsafe YAML, hardcoded secrets, weak hashes |
+| Correctness | 4 | ~19 pts | Mutable defaults, bare/broad except, assert in production, bad `__init__` return |
+| Complexity | 3 | ~14 pts | Cyclomatic complexity > 15 (warning) or > 25 (error) |
+| Architecture | 3 | ~14 pts | Giant modules (>500 lines), deep nesting (>5), god functions (>50 lines), too many args (>7) |
+| Performance | 2 | ~10 pts | String concat in loops, imports inside functions, star imports |
+| Structure | 2 | ~10 pts | Missing `__init__.py`, missing tests directory, no type hints |
+| Imports | 1 | ~5 pts | Circular imports, wildcard imports, import order issues |
+| Dead Code | 1 | ~5 pts | Unused functions, classes, variables, and imports via Vulture |
+
+Framework-specific rules (Django, FastAPI, Flask) are mapped into the Security or Correctness budget.
+
+## Scoring
+
+Py Gate uses a **weighted category-budget system**:
+
+1. Each category has a weight (see table above). Weights are normalized to sum to 100 points of total deduction budget.
+2. Within a category, findings are sorted by cost (errors cost more than warnings). The top 3 findings apply at full cost; every additional finding applies **diminishing returns** (10% of its cost).
+3. A category's deduction is capped at its budget, so a single broken category can never zero out an otherwise healthy project.
+4. Final score = `100 - sum(capped category deductions)`, floored at 0.
+
+| Score | Label | Meaning |
+|-------|-------|---------|
+| 90–100 | Excellent | Production-ready |
+| 75–89 | Great | Minor issues to address |
+| 50–74 | Needs work | Significant issues present |
+| 0–49 | Critical | Blocking issues, do not ship |
 
 ## Configuration
 
-Create a `py-gate.toml` in your project root:
+Create `py-gate.toml` in your project root:
 
 ```toml
 [options]
@@ -138,8 +236,15 @@ verbose = false
 fail_on = "none"
 
 [ignore]
-rules = ["no-import-in-function", "dead-code"]
-files = ["tests/fixtures/**", "migrations/**"]
+rules = ["dead-code", "no-import-in-function"]
+files = ["tests/fixtures/**", "migrations/**", "scripts/**"]
+
+[per-file-ignores]
+"src/legacy/*.py" = ["high-complexity", "no-god-function"]
+
+[scoring]
+max-deduction.Security = 20
+max-deduction.Dead Code = 0  # disable dead-code penalty entirely
 ```
 
 Or use `pyproject.toml`:
@@ -148,103 +253,70 @@ Or use `pyproject.toml`:
 [tool.py-gate]
 lint = true
 dead_code = true
+fail_on = "error"
 
 [tool.py-gate.ignore]
 rules = ["no-import-in-function"]
 files = ["tests/fixtures/**"]
+
+[tool.py-gate.per-file-ignores]
+"src/legacy/*.py" = ["high-complexity"]
+
+[tool.py-gate.scoring]
+"max-deduction" = { Security = 20, "Dead Code" = 0 }
 ```
 
-If both exist, `py-gate.toml` takes precedence. CLI flags always override config values.
+If both files exist, `py-gate.toml` takes precedence. CLI flags always override config values.
 
-## Rules
+## Profiles
 
-### Security
-| Rule | Severity | Description |
-|------|----------|-------------|
-| `no-eval` | Error | `eval()` executes arbitrary code |
-| `no-exec` | Error | `exec()` executes arbitrary code |
-| `no-pickle-load` | Error | `pickle.load()` can execute arbitrary code |
-| `no-unsafe-yaml-load` | Error | `yaml.load()` without Loader is unsafe |
-| `no-hardcoded-secret` | Error | Hardcoded secrets in source code |
-| `no-weak-hash` | Warning | MD5/SHA1 are cryptographically weak |
+Py Gate auto-detects a project profile and adjusts rule weights accordingly. You can also set a profile explicitly in config (`profile = "library"`).
 
-### Performance
-| Rule | Severity | Description |
-|------|----------|-------------|
-| `no-string-concat-in-loop` | Warning | O(n^2) string concatenation |
-| `no-import-in-function` | Warning | Import re-executed on every call |
-| `no-star-import` | Warning | Pollutes namespace |
+| Profile | Auto-detected when | Adjustments |
+|---------|--------------------|-------------|
+| `cli` | `[project.scripts]` in pyproject.toml | Architecture rules weighted up; dead-code weighted down |
+| `web` | Django / FastAPI / Flask detected | Security and correctness weighted up; framework rules active |
+| `library` | No scripts, no framework, has `py.typed` | Public API checks active; dead-code weighted up |
+| `script` | Single-file project or `scripts/` directory | Architecture rules relaxed; complexity thresholds raised |
 
-### Architecture
-| Rule | Severity | Description |
-|------|----------|-------------|
-| `no-giant-module` | Warning | Module exceeds 500 lines |
-| `no-deep-nesting` | Warning | Nesting depth exceeds 5 |
-| `no-god-function` | Warning | Function exceeds 50 lines |
-| `no-too-many-args` | Warning | Function has more than 7 arguments |
+## Pre-commit Hook
 
-### Correctness
-| Rule | Severity | Description |
-|------|----------|-------------|
-| `no-mutable-default` | Error | Mutable default argument shared across calls |
-| `no-bare-except` | Warning | Catches SystemExit and KeyboardInterrupt |
-| `no-broad-except` | Warning | Catches overly broad Exception |
-| `no-assert-in-production` | Warning | Assert statements stripped with -O |
-| `no-return-in-init` | Warning | Return value in `__init__` |
+Use `--pre-commit` to run Py Gate as a pre-commit hook. It automatically scans only the staged files:
 
-### Complexity
-| Rule | Severity | Description |
-|------|----------|-------------|
-| `high-complexity` | Warning | Cyclomatic complexity > 15 |
-| `critical-complexity` | Error | Cyclomatic complexity > 25 |
+```bash
+py-gate . --pre-commit --fail-on error
+```
 
-### Django
-| Rule | Severity | Description |
-|------|----------|-------------|
-| `no-raw-sql-injection` | Error | SQL built with string concatenation |
-| `no-debug-true` | Error | DEBUG = True hardcoded in settings |
-| `no-secret-key-in-source` | Error | SECRET_KEY hardcoded |
-| `no-n-plus-one-query` | Warning | Related object access in loop |
+Add to `.pre-commit-config.yaml`:
 
-### FastAPI
-| Rule | Severity | Description |
-|------|----------|-------------|
-| `no-sync-endpoint` | Warning | Sync def blocks the event loop |
-| `no-missing-response-model` | Warning | Endpoint missing response_model |
-
-### Flask
-| Rule | Severity | Description |
-|------|----------|-------------|
-| `no-flask-secret-in-source` | Error | Secret key hardcoded |
-| `no-flask-debug-mode` | Error | Debug mode in production |
-| `no-sql-string-format` | Error | SQL built with f-strings |
-
-### Dead Code
-| Rule | Severity | Description |
-|------|----------|-------------|
-| `dead-code` | Warning | Unused function, class, import, or variable |
-
-## Python API
-
-```python
-from python_doctor.api import diagnose
-
-result = diagnose("./path/to/your/project")
-
-print(result.score)        # Score(value=82, label="Great")
-print(result.diagnostics)  # List of Diagnostic objects
-print(result.project)      # Detected framework, Python version, etc.
+```yaml
+repos:
+  - repo: local
+    hooks:
+      - id: py-gate
+        name: Py Gate quality check
+        entry: py-gate . --pre-commit --fail-on error
+        language: system
+        types: [python]
+        pass_filenames: false
 ```
 
 ## Contributing
 
 ```bash
-git clone https://github.com/themohitkhare/py-gate
-cd py-gate
+git clone https://github.com/themohitkhare/pythondoctor
+cd pythondoctor
 uv sync --all-extras
-uv run pytest
-uv run py-gate .  # dogfood it
+uv run pytest -q
+uv run py-gate . --verbose  # dogfood it
 ```
+
+To add a new rule:
+
+1. Create a file in `src/python_doctor/rules/` extending `BaseRules`
+2. Implement `check(self, source: str, filename: str) -> list[Diagnostic]`
+3. Register it in `src/python_doctor/rules/__init__.py`
+4. Add tests in `tests/rules/`
 
 ## License
 
