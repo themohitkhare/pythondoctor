@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-import io
-import contextlib
 from pathlib import Path
+
+try:
+    import vulture
+except ImportError:
+    vulture = None  # type: ignore[assignment]
 
 from python_doctor.types import Category, Diagnostic, Severity
 
@@ -14,9 +17,7 @@ class DeadCodeRules:
 
     def check_project(self, project_path: str) -> list[Diagnostic]:
         """Run vulture on the entire project and return diagnostics."""
-        try:
-            import vulture
-        except ImportError:
+        if vulture is None:
             return []
 
         v = vulture.Vulture()
@@ -31,10 +32,16 @@ class DeadCodeRules:
         if not py_files:
             return []
 
-        v.scavenge([str(f) for f in py_files])
+        # Include whitelist if present
+        whitelist = Path(project_path) / "whitelist.py"
+        scan_paths = [str(f) for f in py_files]
+        if whitelist.exists():
+            scan_paths.append(str(whitelist))
+
+        v.scavenge(scan_paths)
 
         diags: list[Diagnostic] = []
-        for item in v.get_unused_code():
+        for item in v.get_unused_code(min_confidence=60):
             diags.append(Diagnostic(
                 file_path=str(item.filename),
                 rule="dead-code",

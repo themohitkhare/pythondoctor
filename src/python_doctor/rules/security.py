@@ -92,19 +92,21 @@ class SecurityRules(BaseRules):
     def _check_hardcoded_secrets(self, tree: ast.Module, filename: str) -> list[Diagnostic]:
         diags: list[Diagnostic] = []
         for node in ast.walk(tree):
-            if isinstance(node, ast.Assign):
-                for target in node.targets:
-                    if isinstance(target, ast.Name) and isinstance(node.value, ast.Constant):
-                        if (isinstance(node.value.value, str)
-                                and _SECRET_VAR_PATTERNS.search(target.id)
-                                and len(node.value.value) >= _SECRET_VALUE_MIN_LENGTH):
-                            diags.append(Diagnostic(
-                                file_path=filename, rule="no-hardcoded-secret", severity=Severity.ERROR,
-                                category=Category.SECURITY,
-                                message=f"Hardcoded secret in '{target.id}' — use environment variables",
-                                help="Use os.environ or a .env file via python-dotenv",
-                                line=node.lineno, column=node.col_offset,
-                            ))
+            if not isinstance(node, ast.Assign):
+                continue
+            if not isinstance(node.value, ast.Constant) or not isinstance(node.value.value, str):
+                continue
+            if len(node.value.value) < _SECRET_VALUE_MIN_LENGTH:
+                continue
+            for target in node.targets:
+                if isinstance(target, ast.Name) and _SECRET_VAR_PATTERNS.search(target.id):
+                    diags.append(Diagnostic(
+                        file_path=filename, rule="no-hardcoded-secret", severity=Severity.ERROR,
+                        category=Category.SECURITY,
+                        message=f"Hardcoded secret in '{target.id}' — use environment variables",
+                        help="Use os.environ or a .env file via python-dotenv",
+                        line=node.lineno, column=node.col_offset,
+                    ))
         return diags
 
     def _check_weak_hash(self, tree: ast.Module, filename: str) -> list[Diagnostic]:

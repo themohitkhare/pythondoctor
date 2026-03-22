@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import ast
-import re
 
 from python_doctor.rules.base import BaseRules
 from python_doctor.types import Category, Diagnostic, Severity
@@ -61,24 +60,30 @@ class DjangoRules(BaseRules):
     def _check_n_plus_one(self, tree: ast.Module, source: str, filename: str) -> list[Diagnostic]:
         diags: list[Diagnostic] = []
         for node in ast.walk(tree):
-            if isinstance(node, ast.For):
-                if self._is_queryset_iter(node.iter):
-                    loop_var = node.target
-                    if isinstance(loop_var, ast.Name):
-                        for child in ast.walk(node):
-                            if (isinstance(child, ast.Attribute)
-                                    and isinstance(child.value, ast.Attribute)
-                                    and isinstance(child.value.value, ast.Name)
-                                    and child.value.value.id == loop_var.id):
-                                diags.append(Diagnostic(
-                                    file_path=filename, rule="no-n-plus-one-query", severity=Severity.WARNING,
-                                    category=Category.DJANGO,
-                                    message="Potential N+1 query — accessing related object in a loop",
-                                    help="Use select_related() or prefetch_related() on the queryset",
-                                    line=child.lineno, column=child.col_offset,
-                                ))
-                                break
+            if not isinstance(node, ast.For) or not self._is_queryset_iter(node.iter):
+                continue
+            if not isinstance(node.target, ast.Name):
+                continue
+            var_name = node.target.id
+            if self._has_related_access(node, var_name):
+                diags.append(Diagnostic(
+                    file_path=filename, rule="no-n-plus-one-query", severity=Severity.WARNING,
+                    category=Category.DJANGO,
+                    message="Potential N+1 query — accessing related object in a loop",
+                    help="Use select_related() or prefetch_related() on the queryset",
+                    line=node.lineno, column=node.col_offset,
+                ))
         return diags
+
+    @staticmethod
+    def _has_related_access(loop_node: ast.For, var_name: str) -> bool:
+        for child in ast.walk(loop_node):
+            if (isinstance(child, ast.Attribute)
+                    and isinstance(child.value, ast.Attribute)
+                    and isinstance(child.value.value, ast.Name)
+                    and child.value.value.id == var_name):
+                return True
+        return False
 
     def _is_queryset_iter(self, node: ast.expr) -> bool:
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):

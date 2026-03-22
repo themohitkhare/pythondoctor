@@ -48,11 +48,13 @@ class PerformanceRules(BaseRules):
     def _find_string_vars(tree: ast.Module) -> set[str]:
         names: set[str] = set()
         for node in ast.walk(tree):
-            if isinstance(node, ast.Assign):
-                if isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
-                    for target in node.targets:
-                        if isinstance(target, ast.Name):
-                            names.add(target.id)
+            if not isinstance(node, ast.Assign):
+                continue
+            if not (isinstance(node.value, ast.Constant) and isinstance(node.value.value, str)):
+                continue
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    names.add(target.id)
         return names
 
     def _check_import_in_function(self, tree: ast.Module, filename: str) -> list[Diagnostic]:

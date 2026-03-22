@@ -1,3 +1,4 @@
+import tempfile
 from pathlib import Path
 
 from python_doctor.config import Config
@@ -23,7 +24,6 @@ def test_clean_project_scores_high():
 
 def test_scan_nonexistent_returns_empty():
     """Scanning a dir with no Python files should still work."""
-    import tempfile
     with tempfile.TemporaryDirectory() as tmp:
         result = scan_project(tmp, Config())
         assert result.score.value == 100
