@@ -49,6 +49,39 @@ class StructureRules:
                 pass
         return diags
 
+    @staticmethod
+    def _count_lines(files: list[str]) -> int:
+        """Return total line count across *files*, ignoring unreadable files."""
+        return sum(len(Path(f).read_text().splitlines()) for f in files if Path(f).exists())
+
+    def _check_test_ratio(
+        self, path: Path, test_files: list[str], src_files: list[str]
+    ) -> list[Diagnostic]:
+        """Return a diagnostic if the test-to-source line ratio is too low."""
+        test_lines = self._count_lines(test_files)
+        src_lines = self._count_lines(src_files)
+        if src_lines == 0:
+            return []
+        ratio = test_lines / src_lines
+        if ratio < 0.1:
+            cost = 2.0
+        elif ratio < 0.3:
+            cost = 1.0
+        else:
+            return []
+        return [
+            Diagnostic(
+                file_path=str(path),
+                rule="structure/low-test-ratio",
+                severity=Severity.WARNING,
+                category=Category.STRUCTURE,
+                message=f"Test:source ratio is {ratio:.1f} (< 0.3)",
+                help="Add more tests to improve coverage",
+                line=0,
+                cost=cost,
+            )
+        ]
+
     def _check_tests(self, path: Path, source_files: list[str]) -> list[Diagnostic]:
         test_files = [
             f
@@ -71,43 +104,7 @@ class StructureRules:
                 )
             ]
 
-        # Test ratio check
-        test_lines = sum(
-            len(Path(f).read_text().splitlines()) for f in test_files if Path(f).exists()
-        )
-        src_lines = sum(
-            len(Path(f).read_text().splitlines()) for f in src_files if Path(f).exists()
-        )
-
-        if src_lines > 0:
-            ratio = test_lines / src_lines
-            if ratio < 0.1:
-                return [
-                    Diagnostic(
-                        file_path=str(path),
-                        rule="structure/low-test-ratio",
-                        severity=Severity.WARNING,
-                        category=Category.STRUCTURE,
-                        message=f"Test:source ratio is {ratio:.1f} (< 0.3)",
-                        help="Add more tests to improve coverage",
-                        line=0,
-                        cost=2.0,
-                    )
-                ]
-            elif ratio < 0.3:
-                return [
-                    Diagnostic(
-                        file_path=str(path),
-                        rule="structure/low-test-ratio",
-                        severity=Severity.WARNING,
-                        category=Category.STRUCTURE,
-                        message=f"Test:source ratio is {ratio:.1f} (< 0.3)",
-                        help="Add more tests to improve coverage",
-                        line=0,
-                        cost=1.0,
-                    )
-                ]
-        return []
+        return self._check_test_ratio(path, test_files, src_files)
 
     def _check_readme(self, path: Path) -> list[Diagnostic]:
         for name in ["README.md", "README.rst", "README", "readme.md"]:

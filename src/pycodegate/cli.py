@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+from dataclasses import dataclass
 
 import click
 
@@ -14,6 +15,94 @@ from pycodegate.types import Severity
 from pycodegate.utils.badge import generate_badge, generate_ci_workflow
 from pycodegate.utils.fixer import run_ruff_fix
 from pycodegate.utils.precommit import install_precommit_hook
+
+
+@dataclass
+class CliOptions:
+    """Bundle of all CLI flags passed to main()."""
+
+    directory: str
+    lint: bool
+    dead_code: bool
+    verbose: bool
+    score_only: bool
+    json_output: bool
+    diff_base: str | None
+    fail_on: str
+    fix: bool
+    profile_override: str | None
+    badge: bool
+    ci_workflow: bool
+    precommit: bool
+    min_score: int | None
+
+
+def _handle_early_exits(opts: CliOptions) -> bool:
+    """Handle flags that exit before scanning. Returns True if handled."""
+    if opts.ci_workflow:
+        click.echo(generate_ci_workflow(), nl=False)
+        return True
+
+    if opts.precommit:
+        effective_min = opts.min_score if opts.min_score is not None else 50
+        msg = install_precommit_hook(opts.directory, min_score=effective_min)
+        click.echo(msg)
+        return True
+
+    return False
+
+
+def _maybe_run_fix(opts: CliOptions) -> None:
+    """Apply ruff auto-fix if --fix was passed."""
+    if not opts.fix:
+        return
+    fixes = run_ruff_fix(opts.directory)
+    if fixes == -1:
+        click.echo("ruff not found, skipping auto-fix")
+    else:
+        click.echo(f"Fixed {fixes} issues via ruff")
+
+
+def _build_config(opts: CliOptions):
+    """Load config and apply CLI overrides."""
+    config = load_config(opts.directory)
+    config.lint = opts.lint
+    config.dead_code = opts.dead_code
+    config.verbose = opts.verbose
+    config.fail_on = opts.fail_on
+    if opts.profile_override is not None:
+        config.profile = opts.profile_override
+    return config
+
+
+def _output_result(opts: CliOptions, result) -> None:
+    """Write scan result to stdout in the requested format."""
+    if opts.badge:
+        click.echo(generate_badge(result.score.value, result.score.label))
+        return
+
+    if opts.json_output:
+        output_json(result)
+    elif opts.score_only:
+        click.echo(str(result.score.value))
+    else:
+        print_scan_result(result, verbose=opts.verbose)
+
+
+def _apply_exit_codes(opts: CliOptions, result) -> None:
+    """Exit with non-zero code based on --fail-on and --min-score."""
+    has_errors = any(d.severity == Severity.ERROR for d in result.diagnostics)
+    if (opts.fail_on == "error" and has_errors) or (
+        opts.fail_on == "warning" and result.diagnostics
+    ):
+        sys.exit(1)
+
+    if opts.min_score is not None and result.score.value < opts.min_score:
+        click.echo(
+            f"pycodegate: score {result.score.value} is below minimum {opts.min_score}",
+            err=True,
+        )
+        sys.exit(1)
 
 
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})
@@ -80,52 +169,30 @@ def main(
     min_score: int | None,
 ) -> None:
     """PyCodeGate — Diagnose your Python project's health."""
-    if ci_workflow:
-        click.echo(generate_ci_workflow(), nl=False)
+    opts = CliOptions(
+        directory=directory,
+        lint=lint,
+        dead_code=dead_code,
+        verbose=verbose,
+        score_only=score_only,
+        json_output=json_output,
+        diff_base=diff_base,
+        fail_on=fail_on,
+        fix=fix,
+        profile_override=profile_override,
+        badge=badge,
+        ci_workflow=ci_workflow,
+        precommit=precommit,
+        min_score=min_score,
+    )
+
+    if _handle_early_exits(opts):
         return
 
-    if precommit:
-        effective_min = min_score if min_score is not None else 50
-        msg = install_precommit_hook(directory, min_score=effective_min)
-        click.echo(msg)
-        return
+    _maybe_run_fix(opts)
 
-    if fix:
-        fixes = run_ruff_fix(directory)
-        if fixes == -1:
-            click.echo("ruff not found, skipping auto-fix")
-        else:
-            click.echo(f"Fixed {fixes} issues via ruff")
-
-    config = load_config(directory)
-    config.lint = lint
-    config.dead_code = dead_code
-    config.verbose = verbose
-    config.fail_on = fail_on
-    if profile_override is not None:
-        config.profile = profile_override
-
+    config = _build_config(opts)
     result = scan_project(directory, config, diff_base=diff_base)
 
-    if badge:
-        click.echo(generate_badge(result.score.value, result.score.label))
-        return
-
-    if json_output:
-        output_json(result)
-    elif score_only:
-        click.echo(str(result.score.value))
-    else:
-        print_scan_result(result, verbose=verbose)
-
-    # Exit code based on --fail-on
-    has_errors = any(d.severity == Severity.ERROR for d in result.diagnostics)
-    if (fail_on == "error" and has_errors) or (fail_on == "warning" and result.diagnostics):
-        sys.exit(1)
-
-    if min_score is not None and result.score.value < min_score:
-        click.echo(
-            f"pycodegate: score {result.score.value} is below minimum {min_score}",
-            err=True,
-        )
-        sys.exit(1)
+    _output_result(opts, result)
+    _apply_exit_codes(opts, result)

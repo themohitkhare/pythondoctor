@@ -72,4 +72,8 @@ ignore = ["SIM102"]  # nested ifs in AST walking are clearer than combined condi
 
 [tool.pycodegate]
 [tool.pycodegate.ignore]
-files = ["tests/fixtures/**"]
+files = ["tests/fixtures/**", "tests/**"]
+
+[tool.pycodegate.per-file-suppress]
+# Click CLI entry-points must declare all options as individual parameters
+"src/pycodegate/cli.py" = ["too-many-arguments"]

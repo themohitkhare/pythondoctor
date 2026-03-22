@@ -32,6 +32,56 @@ PROFILES = {
 }
 
 
+def _normalise_dep(dep: str) -> str:
+    """Strip version specifiers and extras from a dependency string."""
+    return dep.split("[")[0].split(">")[0].split("<")[0].split("=")[0].split("!")[0].strip().lower()
+
+
+def _deps_from_pyproject(pyproject: Path) -> tuple[set[str], bool, bool]:
+    """Parse pyproject.toml and return (deps, has_build_system, has_scripts)."""
+    deps: set[str] = set()
+    has_build_system = False
+    has_scripts = False
+    try:
+        with open(pyproject, "rb") as f:
+            data = tomllib.load(f)
+        for dep in data.get("project", {}).get("dependencies", []):
+            deps.add(_normalise_dep(dep))
+        has_build_system = "build-system" in data
+        has_scripts = bool(data.get("project", {}).get("scripts"))
+    except (OSError, ValueError, KeyError):
+        pass
+    return deps, has_build_system, has_scripts
+
+
+def _deps_from_requirements(path: Path) -> set[str]:
+    """Parse requirements files and return the set of normalised dep names."""
+    deps: set[str] = set()
+    for req_file in ["requirements.txt", "requirements-dev.txt"]:
+        req_path = path / req_file
+        if not req_path.exists():
+            continue
+        try:
+            for line in req_path.read_text().splitlines():
+                line = line.strip()
+                if line and not line.startswith("#") and not line.startswith("-"):
+                    deps.add(_normalise_dep(line))
+        except (OSError, ValueError):
+            pass
+    return deps
+
+
+def _classify_by_deps(deps: set[str], has_scripts: bool) -> str | None:
+    """Return a profile name based on dependencies, or None if undetermined."""
+    web_deps = {"flask", "django", "fastapi", "starlette", "tornado", "aiohttp", "sanic", "bottle"}
+    if deps & web_deps:
+        return "web"
+    cli_deps = {"click", "typer", "fire", "cement", "cliff", "argparse"}
+    if (deps & cli_deps) or has_scripts:
+        return "cli"
+    return None
+
+
 def detect_profile(project_path: str) -> Profile:
     """Auto-detect project profile from project structure and dependencies."""
     path = Path(project_path)
@@ -42,56 +92,15 @@ def detect_profile(project_path: str) -> Profile:
     has_scripts = False
 
     if pyproject.exists():
-        try:
-            with open(pyproject, "rb") as f:
-                data = tomllib.load(f)
-            # Collect dependency names
-            for dep in data.get("project", {}).get("dependencies", []):
-                deps.add(
-                    dep.split("[")[0]
-                    .split(">")[0]
-                    .split("<")[0]
-                    .split("=")[0]
-                    .split("!")[0]
-                    .strip()
-                    .lower()
-                )
-            has_build_system = "build-system" in data
-            has_scripts = bool(data.get("project", {}).get("scripts"))
-        except Exception:
-            pass
+        pyproject_deps, has_build_system, has_scripts = _deps_from_pyproject(pyproject)
+        deps |= pyproject_deps
 
-    # Also check requirements.txt
-    for req_file in ["requirements.txt", "requirements-dev.txt"]:
-        req_path = path / req_file
-        if req_path.exists():
-            try:
-                for line in req_path.read_text().splitlines():
-                    line = line.strip()
-                    if line and not line.startswith("#") and not line.startswith("-"):
-                        deps.add(
-                            line.split("[")[0]
-                            .split(">")[0]
-                            .split("<")[0]
-                            .split("=")[0]
-                            .split("!")[0]
-                            .strip()
-                            .lower()
-                        )
-            except Exception:
-                pass
+    deps |= _deps_from_requirements(path)
 
-    # Web frameworks
-    web_deps = {"flask", "django", "fastapi", "starlette", "tornado", "aiohttp", "sanic", "bottle"}
-    if deps & web_deps:
-        return PROFILES["web"]
+    profile_name = _classify_by_deps(deps, has_scripts)
+    if profile_name is not None:
+        return PROFILES[profile_name]
 
-    # CLI tools
-    cli_deps = {"click", "typer", "fire", "cement", "cliff", "argparse"}
-    if (deps & cli_deps) or has_scripts:
-        return PROFILES["cli"]
-
-    # Library
     if has_build_system and not has_scripts:
         return PROFILES["library"]
 
@@ -103,5 +112,4 @@ def detect_profile(project_path: str) -> Profile:
     if not has_init and len(py_files) <= 5:
         return PROFILES["script"]
 
-    # Default to library
     return PROFILES["library"]

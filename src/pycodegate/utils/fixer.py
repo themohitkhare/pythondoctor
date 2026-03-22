@@ -21,7 +21,7 @@ def run_ruff_fix(project_path: str) -> int:
     except FileNotFoundError:
         # ruff is not installed
         return -1
-    except Exception:
+    except (OSError, subprocess.SubprocessError):
         return 0
 
     # ruff prints something like "Fixed 3 errors." to stdout or stderr

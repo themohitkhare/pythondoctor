@@ -1,14 +1,14 @@
 """Vulture whitelist — these symbols are used but vulture can't detect it."""
 
-# Public API
-from python_doctor.api import diagnose  # noqa: F401
+# Public API — called by external users of the pycodegate package
+import pycodegate.api
+import pycodegate.constants
+import pycodegate.types
+import pycodegate.utils.ast_helpers
 
-# Dataclass fields accessed dynamically or in templates
-from python_doctor.types import ProjectInfo, Score  # noqa: F401
-
-ProjectInfo.has_type_hints  # type: ignore[truthy-function]
-ProjectInfo.source_file_count  # type: ignore[truthy-function]
-Score.label  # type: ignore[truthy-function]
-
-# AST helper used by rules
-from python_doctor.utils.ast_helpers import parse_file  # noqa: F401
+pycodegate.api.diagnose  # public API function
+pycodegate.constants.SCORE_GREAT  # exported threshold constant
+pycodegate.constants.SCORE_NEEDS_WORK  # exported threshold constant
+pycodegate.types.Diagnostic.column  # used by rules that track column offsets
+pycodegate.types.ProjectInfo.has_type_hints  # accessed in output/templates
+pycodegate.utils.ast_helpers.parse_file  # utility used by rule checkers

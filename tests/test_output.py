@@ -1,7 +1,9 @@
+import re
 from io import StringIO
 
 from rich.console import Console
 
+import pycodegate.output as output_mod
 from pycodegate.output import (
     format_doctor_face,
     format_score_bar,
@@ -51,8 +53,6 @@ def _capture_output(result: ScanResult, verbose: bool = False) -> str:
     buf = StringIO()
     console = Console(file=buf, highlight=False, markup=True, no_color=True)
     # Patch console into print_scan_result by monkey-patching module
-    import pycodegate.output as output_mod
-
     original_console_cls = output_mod.Console
 
     class _FakeConsole(Console):
@@ -156,8 +156,6 @@ def test_sub_scores_appear():
     output = _capture_output(result)
     # With no diagnostics every category earns its max, so earned==max
     # Check at least one pattern like "(24/24)" or similar parenthesised numbers
-    import re
-
     matches = re.findall(r"\(\d+/\d+\)", output)
     assert len(matches) >= len(
         [

@@ -15,16 +15,10 @@ from pycodegate.constants import (
 from pycodegate.types import Diagnostic, Score
 
 
-def calculate_score(
-    diagnostics: list[Diagnostic], max_deduction_overrides: dict | None = None
-) -> Score:
-    """Calculate a 0-100 health score from diagnostics using category budgets.
-
-    Each category has a weight that determines its maximum deduction budget.
-    Within a category, the top 3 findings are counted at full cost; additional
-    findings apply diminishing returns (10% each) to reward fixing top issues.
-    """
-    # 1. Compute max_deduction per category from weights
+def _build_budget(
+    max_deduction_overrides: dict | None,
+) -> dict:
+    """Return per-category maximum deduction budget normalised to sum to 100."""
     total_weight = sum(CATEGORY_WEIGHTS.values())
     max_deductions = {cat: round(w / total_weight * 100) for cat, w in CATEGORY_WEIGHTS.items()}
 
@@ -34,19 +28,43 @@ def calculate_score(
         highest = max(CATEGORY_WEIGHTS, key=CATEGORY_WEIGHTS.get)
         max_deductions[highest] += diff
 
-    # Apply overrides
     if max_deduction_overrides:
         for cat, val in max_deduction_overrides.items():
             if cat in max_deductions:
                 max_deductions[cat] = val
 
-    # 2. Group diagnostics by resolved category
+    return max_deductions
+
+
+def _score_label(value: int) -> str:
+    """Return a human-readable label for a numeric score."""
+    if value >= 90:
+        return LABEL_EXCELLENT
+    if value >= 75:
+        return LABEL_GREAT
+    if value >= 50:
+        return LABEL_NEEDS_WORK
+    return LABEL_CRITICAL
+
+
+def calculate_score(
+    diagnostics: list[Diagnostic], max_deduction_overrides: dict | None = None
+) -> Score:
+    """Calculate a 0-100 health score from diagnostics using category budgets.
+
+    Each category has a weight that determines its maximum deduction budget.
+    Within a category, the top 3 findings are counted at full cost; additional
+    findings apply diminishing returns (10% each) to reward fixing top issues.
+    """
+    max_deductions = _build_budget(max_deduction_overrides)
+
+    # Group diagnostics by resolved category
     by_category: dict = defaultdict(list)
     for d in diagnostics:
         resolved = FRAMEWORK_CATEGORY_MAP.get(d.category, d.category)
         by_category[resolved].append(d)
 
-    # 3. Calculate deduction per category with diminishing returns
+    # Calculate deduction per category with diminishing returns
     total_deduction = 0.0
     for cat, diags in by_category.items():
         costs = sorted([d.cost for d in diags], reverse=True)
@@ -56,14 +74,4 @@ def calculate_score(
         total_deduction += min(cat_total, cap)
 
     value = max(0, round(100 - total_deduction))
-
-    if value >= 90:
-        label = LABEL_EXCELLENT
-    elif value >= 75:
-        label = LABEL_GREAT
-    elif value >= 50:
-        label = LABEL_NEEDS_WORK
-    else:
-        label = LABEL_CRITICAL
-
-    return Score(value=value, label=label)
+    return Score(value=value, label=_score_label(value))

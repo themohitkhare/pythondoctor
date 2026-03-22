@@ -138,8 +138,6 @@ def print_scan_result(result: ScanResult, verbose: bool = False) -> None:
     # Project info header
     p = result.project
     console.print()
-    from pycodegate import __version__
-
     console.print(f"  [bold]PyCodeGate[/bold] — v{__version__}")
     console.print()
     console.print(f"  [dim]Path:[/dim]            {p.path}")
@@ -215,6 +213,47 @@ def output_json(result: ScanResult) -> None:
     sys.stdout.write(json.dumps(payload, indent=2) + "\n")
 
 
+def _print_rule_details(
+    console: Console,
+    rule_diags: list[Diagnostic],
+    verbose: bool,
+) -> None:
+    """Print a single rule line and, in verbose mode, the file locations."""
+    rule = rule_diags[0].rule
+    count = len(rule_diags)
+    sev = rule_diags[0].severity
+    icon = "[red]✗[/red]" if sev == Severity.ERROR else "[yellow]⚠[/yellow]"
+    console.print(f"    {icon} {rule} × {count}")
+    if not verbose:
+        return
+    for d in rule_diags[:10]:
+        console.print(f"      [dim]{d.file_path}:{d.line}[/dim]")
+    if count > 10:
+        console.print(f"      [dim]... and {count - 10} more[/dim]")
+
+
+def _print_category_with_issues(
+    console: Console,
+    emoji: str,
+    name: str,
+    earned: int,
+    maximum: int,
+    cat_diags: list[Diagnostic],
+    verbose: bool,
+) -> None:
+    """Print a category header and its grouped rule findings."""
+    console.print(f"  [bold]{emoji} {name}[/bold] [yellow]({earned}/{maximum})[/yellow]")
+    by_rule: dict[str, list[Diagnostic]] = defaultdict(list)
+    for d in cat_diags:
+        by_rule[d.rule].append(d)
+    sorted_rules = sorted(
+        by_rule.keys(),
+        key=lambda r: (0 if by_rule[r][0].severity == Severity.ERROR else 1, r),
+    )
+    for rule in sorted_rules:
+        _print_rule_details(console, by_rule[rule], verbose)
+
+
 def _print_category_groups(
     console: Console,
     diagnostics: list[Diagnostic],
@@ -235,38 +274,15 @@ def _print_category_groups(
             continue
         emoji, name = CATEGORY_DISPLAY[cat]
         earned, maximum = sub_scores.get(cat, (CATEGORY_WEIGHTS[cat], CATEGORY_WEIGHTS[cat]))
-        # Recompute max from sub_scores (already normalised to 100-point scale)
         cat_diags = by_category.get(cat, [])
 
         if earned == maximum:
-            # Perfect score for this category
             console.print(
                 f"  [bold]{emoji} {name}[/bold] "
                 f"[green]({earned}/{maximum})[/green] [green]✓[/green]"
             )
             console.print("    [green]✓ All clear.[/green]")
         else:
-            console.print(f"  [bold]{emoji} {name}[/bold] [yellow]({earned}/{maximum})[/yellow]")
-            # Group by rule within this category
-            by_rule: dict[str, list[Diagnostic]] = defaultdict(list)
-            for d in cat_diags:
-                by_rule[d.rule].append(d)
-
-            # Sort: errors first, then by rule name
-            sorted_rules = sorted(
-                by_rule.keys(),
-                key=lambda r: (0 if by_rule[r][0].severity == Severity.ERROR else 1, r),
-            )
-            for rule in sorted_rules:
-                rule_diags = by_rule[rule]
-                count = len(rule_diags)
-                sev = rule_diags[0].severity
-                icon = "[red]✗[/red]" if sev == Severity.ERROR else "[yellow]⚠[/yellow]"
-                console.print(f"    {icon} {rule} × {count}")
-                if verbose:
-                    for d in rule_diags[:10]:
-                        console.print(f"      [dim]{d.file_path}:{d.line}[/dim]")
-                    if count > 10:
-                        console.print(f"      [dim]... and {count - 10} more[/dim]")
+            _print_category_with_issues(console, emoji, name, earned, maximum, cat_diags, verbose)
 
         console.print()

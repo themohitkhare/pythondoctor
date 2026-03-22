@@ -14,15 +14,8 @@ from pycodegate.types import Category, Diagnostic, Severity
 class DependencyRules:
     """Dependency vulnerability checks using pip-audit (optional)."""
 
-    def check_project(self, project_path: str) -> list[Diagnostic]:
-        if not shutil.which("pip-audit"):
-            return []
-
-        path = Path(project_path)
-        req_file = self._find_or_export_requirements(path)
-        if not req_file:
-            return []
-
+    def _run_pip_audit(self, req_file: Path) -> dict | None:
+        """Run pip-audit against *req_file* and return parsed JSON, or None on failure."""
         try:
             result = subprocess.run(
                 [
@@ -38,17 +31,14 @@ class DependencyRules:
                 text=True,
                 timeout=60,
             )
-            # pip-audit exits non-zero when vulnerabilities found
             if not result.stdout.strip():
-                return []
-            data = json.loads(result.stdout)
+                return None
+            return json.loads(result.stdout)
         except (subprocess.TimeoutExpired, json.JSONDecodeError, OSError):
-            return []
-        finally:
-            # Clean up temp file if we created one
-            if req_file and str(req_file).startswith(tempfile.gettempdir()):
-                req_file.unlink(missing_ok=True)
+            return None
 
+    def _build_vuln_diagnostics(self, data: dict) -> list[Diagnostic]:
+        """Convert pip-audit JSON output into Diagnostic objects."""
         diags: list[Diagnostic] = []
         for vuln in data.get("dependencies", []):
             pkg_name = vuln.get("name", "unknown")
@@ -70,6 +60,26 @@ class DependencyRules:
                     )
                 )
         return diags
+
+    def check_project(self, project_path: str) -> list[Diagnostic]:
+        if not shutil.which("pip-audit"):
+            return []
+
+        path = Path(project_path)
+        req_file = self._find_or_export_requirements(path)
+        if not req_file:
+            return []
+
+        try:
+            data = self._run_pip_audit(req_file)
+        finally:
+            # Clean up temp file if we created one
+            if req_file and str(req_file).startswith(tempfile.gettempdir()):
+                req_file.unlink(missing_ok=True)
+
+        if data is None:
+            return []
+        return self._build_vuln_diagnostics(data)
 
     def _find_or_export_requirements(self, path: Path) -> Path | None:
         # Try existing requirements.txt
