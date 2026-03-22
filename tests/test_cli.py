@@ -9,7 +9,7 @@ def test_cli_help():
     runner = CliRunner()
     result = runner.invoke(main, ["--help"])
     assert result.exit_code == 0
-    assert "Py Doctor" in result.output or "py-doctor" in result.output
+    assert "Py Gate" in result.output or "py-gate" in result.output
 
 
 def test_cli_version():

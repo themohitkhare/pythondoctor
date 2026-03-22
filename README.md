@@ -1,7 +1,7 @@
-# py-doctor
+# py-gate
 
-[![PyPI version](https://img.shields.io/pypi/v/py-doctor?style=flat&colorA=000000&colorB=000000)](https://pypi.org/project/py-doctor/)
-[![Downloads](https://img.shields.io/pypi/dm/py-doctor?style=flat&colorA=000000&colorB=000000)](https://pypi.org/project/py-doctor/)
+[![PyPI version](https://img.shields.io/pypi/v/py-gate?style=flat&colorA=000000&colorB=000000)](https://pypi.org/project/py-gate/)
+[![Downloads](https://img.shields.io/pypi/dm/py-gate?style=flat&colorA=000000&colorB=000000)](https://pypi.org/project/py-gate/)
 
 Diagnose your Python project's health. One command scans your codebase for security, performance, correctness, and architecture issues, then outputs a **0-100 score** with actionable diagnostics.
 
@@ -21,21 +21,21 @@ Diagnostics are filtered through your config, then scored by severity (errors we
 Run instantly with uvx (no install needed):
 
 ```bash
-uvx py-doctor .
+uvx py-gate .
 ```
 
 Or install globally:
 
 ```bash
-uv tool install py-doctor
+uv tool install py-gate
 # or
-pip install py-doctor
+pip install py-gate
 ```
 
 Use `--verbose` to see affected files and line numbers:
 
 ```bash
-py-doctor . --verbose
+py-gate . --verbose
 ```
 
 ## Install for your coding agent
@@ -44,7 +44,7 @@ Add the skill to your Claude Code, Cursor, or other AI coding agent:
 
 ```bash
 # Claude Code
-cp skills/py-doctor/SKILL.md .claude/skills/py-doctor.md
+cp skills/py-gate/SKILL.md .claude/skills/py-gate.md
 ```
 
 Or reference the AGENTS.md in your project root — it's automatically picked up by Claude Code, Cursor, Windsurf, and others.
@@ -58,16 +58,16 @@ Or reference the AGENTS.md in your project root — it's automatically picked up
 - uses: actions/setup-python@v5
   with:
     python-version: "3.12"
-- name: Run Py Doctor
+- name: Run Py Gate
   run: |
-    pip install py-doctor
-    py-doctor . --verbose --diff main --fail-on error
+    pip install py-gate
+    py-gate . --verbose --diff main --fail-on error
 ```
 
 ## Options
 
 ```
-Usage: py-doctor [OPTIONS] [DIRECTORY]
+Usage: py-gate [OPTIONS] [DIRECTORY]
 
 Options:
   -v, --version                   Show the version and exit.
@@ -87,7 +87,7 @@ Options:
 The `--json` flag returns machine-readable output that AI agents can parse:
 
 ```bash
-py-doctor . --json
+py-gate . --json
 ```
 
 ```json
@@ -123,12 +123,12 @@ py-doctor . --json
 Fix auto-fixable issues via ruff before scanning:
 
 ```bash
-py-doctor . --fix --verbose
+py-gate . --fix --verbose
 ```
 
 ## Configuration
 
-Create a `py-doctor.toml` in your project root:
+Create a `py-gate.toml` in your project root:
 
 ```toml
 [options]
@@ -145,16 +145,16 @@ files = ["tests/fixtures/**", "migrations/**"]
 Or use `pyproject.toml`:
 
 ```toml
-[tool.py-doctor]
+[tool.py-gate]
 lint = true
 dead_code = true
 
-[tool.py-doctor.ignore]
+[tool.py-gate.ignore]
 rules = ["no-import-in-function"]
 files = ["tests/fixtures/**"]
 ```
 
-If both exist, `py-doctor.toml` takes precedence. CLI flags always override config values.
+If both exist, `py-gate.toml` takes precedence. CLI flags always override config values.
 
 ## Rules
 
@@ -239,11 +239,11 @@ print(result.project)      # Detected framework, Python version, etc.
 ## Contributing
 
 ```bash
-git clone https://github.com/themohitkhare/py-doctor
-cd py-doctor
+git clone https://github.com/themohitkhare/py-gate
+cd py-gate
 uv sync --all-extras
 uv run pytest
-uv run py-doctor .  # dogfood it
+uv run py-gate .  # dogfood it
 ```
 
 ## License

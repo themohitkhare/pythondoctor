@@ -87,7 +87,7 @@ def print_scan_result(result: ScanResult, verbose: bool = False) -> None:
     # Project info
     p = result.project
     console.print()
-    console.print("  [bold]Py Doctor[/bold] — v0.1.0")
+    console.print("  [bold]Py Gate[/bold] — v0.1.0")
     console.print()
     console.print(f"  [dim]Path:[/dim]            {p.path}")
     if p.framework:

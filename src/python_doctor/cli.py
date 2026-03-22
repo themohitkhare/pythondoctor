@@ -15,7 +15,7 @@ from python_doctor.utils.fixer import run_ruff_fix
 
 
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})
-@click.version_option(__version__, "-v", "--version", prog_name="Py Doctor")
+@click.version_option(__version__, "-v", "--version", prog_name="Py Gate")
 @click.argument("directory", default=".", type=click.Path(exists=True))
 @click.option("--lint/--no-lint", default=True, help="Enable/disable lint checks.")
 @click.option(
@@ -49,7 +49,7 @@ def main(
     fail_on: str,
     fix: bool,
 ) -> None:
-    """Py Doctor — Diagnose your Python project's health."""
+    """Py Gate — Diagnose your Python project's health."""
     if fix:
         fixes = run_ruff_fix(directory)
         if fixes == -1:

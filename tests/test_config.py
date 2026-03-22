@@ -22,7 +22,7 @@ dead_code = false
 verbose = true
 fail_on = "error"
 """
-    (tmp_path / "py-doctor.toml").write_text(toml_content)
+    (tmp_path / "py-gate.toml").write_text(toml_content)
     cfg = load_config(str(tmp_path))
     assert cfg.dead_code is False
     assert cfg.verbose is True
@@ -33,13 +33,13 @@ fail_on = "error"
 
 def test_load_from_pyproject_toml(tmp_path):
     toml_content = """
-[tool.py-doctor]
+[tool.py-gate]
 lint = true
 dead_code = true
 verbose = false
 fail_on = "none"
 
-[tool.py-doctor.ignore]
+[tool.py-gate.ignore]
 rules = ["no-pickle"]
 files = []
 """
@@ -50,12 +50,12 @@ files = []
 
 
 def test_python_doctor_toml_takes_precedence(tmp_path):
-    (tmp_path / "py-doctor.toml").write_text("""
+    (tmp_path / "py-gate.toml").write_text("""
 [options]
 verbose = true
 """)
     (tmp_path / "pyproject.toml").write_text("""
-[tool.py-doctor]
+[tool.py-gate]
 verbose = false
 """)
     cfg = load_config(str(tmp_path))
