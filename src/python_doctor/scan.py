@@ -13,6 +13,7 @@ from python_doctor.profile import PROFILES, detect_profile
 from python_doctor.rules import get_all_rule_sets, get_framework_rules
 from python_doctor.rules.dead_code import DeadCodeRules
 from python_doctor.rules.imports import ImportsRules
+from python_doctor.rules.structure import StructureRules
 from python_doctor.score import calculate_score
 from python_doctor.types import Diagnostic, ScanResult
 from python_doctor.utils.diff import get_changed_files
@@ -66,20 +67,28 @@ def _run_checks(
     project_path: str,
     config: Config,
 ) -> list[Diagnostic]:
-    """Run lint + dead code + imports checks in parallel."""
+    """Run lint + dead code + imports + structure checks in parallel."""
     str_files = [str(f) for f in files]
-    with ThreadPoolExecutor(max_workers=3) as executor:
+    with ThreadPoolExecutor(max_workers=4) as executor:
         lint_future = executor.submit(_run_lint, files, framework, config) if config.lint else None
         dead_code_future = (
             executor.submit(_run_dead_code, project_path, config) if config.dead_code else None
         )
-        imports_future = executor.submit(_run_imports, project_path, str_files)
+        imports_future = (
+            executor.submit(_run_imports, project_path, str_files) if str_files else None
+        )
+        structure_future = (
+            executor.submit(_run_structure, project_path, str_files)
+            if config.lint and str_files
+            else None
+        )
 
         lint_diags = lint_future.result() if lint_future else []
         dead_code_diags = dead_code_future.result() if dead_code_future else []
-        imports_diags = imports_future.result()
+        imports_diags = imports_future.result() if imports_future else []
+        structure_diags = structure_future.result() if structure_future else []
 
-    return lint_diags + dead_code_diags + imports_diags
+    return lint_diags + dead_code_diags + imports_diags + structure_diags
 
 
 def _apply_filters(
@@ -140,3 +149,8 @@ def _run_dead_code(project_path: str, config: Config) -> list[Diagnostic]:
 def _run_imports(project_path: str, source_files: list[str]) -> list[Diagnostic]:
     """Run circular import detection."""
     return ImportsRules().check_project(project_path, source_files)
+
+
+def _run_structure(project_path: str, source_files: list[str]) -> list[Diagnostic]:
+    """Run project-level structure checks."""
+    return StructureRules().check_project(project_path, source_files)
