@@ -11,7 +11,9 @@ from python_doctor.config import load_config
 from python_doctor.output import output_json, print_scan_result
 from python_doctor.scan import scan_project
 from python_doctor.types import Severity
+from python_doctor.utils.badge import generate_badge, generate_ci_workflow
 from python_doctor.utils.fixer import run_ruff_fix
+from python_doctor.utils.precommit import install_precommit_hook
 
 
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})
@@ -45,6 +47,22 @@ from python_doctor.utils.fixer import run_ruff_fix
     default=None,
     help="Override auto-detected project profile.",
 )
+@click.option(
+    "--badge", "badge", is_flag=True, default=False, help="Output shields.io badge markdown."
+)
+@click.option(
+    "--ci", "ci_workflow", is_flag=True, default=False, help="Output GitHub Actions workflow YAML."
+)
+@click.option(
+    "--pre-commit", "precommit", is_flag=True, default=False, help="Install git pre-commit hook."
+)
+@click.option(
+    "--min-score",
+    "min_score",
+    type=int,
+    default=None,
+    help="Minimum score threshold (exit 1 if below).",
+)
 def main(
     directory: str,
     lint: bool,
@@ -56,8 +74,22 @@ def main(
     fail_on: str,
     fix: bool,
     profile_override: str | None,
+    badge: bool,
+    ci_workflow: bool,
+    precommit: bool,
+    min_score: int | None,
 ) -> None:
     """Py Gate — Diagnose your Python project's health."""
+    if ci_workflow:
+        click.echo(generate_ci_workflow(), nl=False)
+        return
+
+    if precommit:
+        effective_min = min_score if min_score is not None else 50
+        msg = install_precommit_hook(directory, min_score=effective_min)
+        click.echo(msg)
+        return
+
     if fix:
         fixes = run_ruff_fix(directory)
         if fixes == -1:
@@ -75,6 +107,10 @@ def main(
 
     result = scan_project(directory, config, diff_base=diff_base)
 
+    if badge:
+        click.echo(generate_badge(result.score.value, result.score.label))
+        return
+
     if json_output:
         output_json(result)
     elif score_only:
@@ -85,4 +121,11 @@ def main(
     # Exit code based on --fail-on
     has_errors = any(d.severity == Severity.ERROR for d in result.diagnostics)
     if (fail_on == "error" and has_errors) or (fail_on == "warning" and result.diagnostics):
+        sys.exit(1)
+
+    if min_score is not None and result.score.value < min_score:
+        click.echo(
+            f"py-gate: score {result.score.value} is below minimum {min_score}",
+            err=True,
+        )
         sys.exit(1)

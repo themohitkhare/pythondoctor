@@ -89,3 +89,37 @@ def test_cli_json_output(tmp_path):
     assert isinstance(data["score"], int)
     assert isinstance(data["errors"], int)
     assert isinstance(data["warnings"], int)
+
+
+def test_badge_output(tmp_path):
+    (tmp_path / "app.py").write_text("x = 1\n")
+    runner = CliRunner()
+    result = runner.invoke(main, [str(tmp_path), "--badge"])
+    assert result.exit_code == 0
+    assert "https://img.shields.io/badge/py--gate-" in result.output
+    assert "shields.io" in result.output
+
+
+def test_min_score_pass(tmp_path):
+    (tmp_path / "app.py").write_text("x = 1\n")
+    runner = CliRunner()
+    # A clean file should score high enough to pass a very low threshold
+    result = runner.invoke(main, [str(tmp_path), "--min-score", "1"])
+    assert result.exit_code == 0
+
+
+def test_min_score_fail(tmp_path):
+    (tmp_path / "app.py").write_text("x = 1\n")
+    runner = CliRunner()
+    # Require a score of 101 (impossible), so it must fail
+    result = runner.invoke(main, [str(tmp_path), "--min-score", "101"])
+    assert result.exit_code == 1
+
+
+def test_ci_workflow(tmp_path):
+    (tmp_path / "app.py").write_text("x = 1\n")
+    runner = CliRunner()
+    result = runner.invoke(main, [str(tmp_path), "--ci"])
+    assert result.exit_code == 0
+    assert "name: Py Gate Score" in result.output
+    assert "py-gate" in result.output
