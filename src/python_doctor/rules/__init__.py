@@ -6,6 +6,7 @@ from python_doctor.rules.architecture import ArchitectureRules
 from python_doctor.rules.base import BaseRules
 from python_doctor.rules.complexity import ComplexityRules
 from python_doctor.rules.correctness import CorrectnessRules
+from python_doctor.rules.dependencies import DependencyRules as DependencyRules
 from python_doctor.rules.django import DjangoRules
 from python_doctor.rules.fastapi import FastAPIRules
 from python_doctor.rules.flask import FlaskRules
