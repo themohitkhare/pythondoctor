@@ -28,10 +28,6 @@ class NumpyRules(BaseRules):
                 diags.extend(self._check_nan_in_int_array(node, filename))
         return diags
 
-    # ------------------------------------------------------------------
-    # Rule 1: numpy-array-equality
-    # ------------------------------------------------------------------
-
     def _is_np_array_call(self, node: ast.expr) -> bool:
         """Return True if the node is a call to an np array constructor."""
         if not isinstance(node, ast.Call):
@@ -79,10 +75,6 @@ class NumpyRules(BaseRules):
             for cmp in flagged
         ]
 
-    # ------------------------------------------------------------------
-    # Rule 2: numpy-builtin-on-array
-    # ------------------------------------------------------------------
-
     def _is_np_call(self, node: ast.expr) -> bool:
         """Return True if node is any call whose func involves 'np'."""
         if not isinstance(node, ast.Call):
@@ -115,10 +107,6 @@ class NumpyRules(BaseRules):
                 cost=1.0,
             )
         ]
-
-    # ------------------------------------------------------------------
-    # Rule 3: numpy-nan-in-int-array
-    # ------------------------------------------------------------------
 
     def _check_nan_in_int_array(self, node: ast.Call, filename: str) -> list[Diagnostic]:
         if not self._is_np_array_literal(node):

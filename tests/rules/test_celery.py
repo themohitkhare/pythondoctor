@@ -5,9 +5,6 @@ def _run(source: str) -> list:
     return CeleryRules().check(source, "tasks.py")
 
 
-# -- celery-missing-bind --------------------------------------------------
-
-
 def test_missing_bind():
     source = """
 from celery import shared_task
@@ -30,9 +27,6 @@ def add(self, x, y):
 """
     diags = _run(source)
     assert not any(d.rule == "celery-missing-bind" for d in diags)
-
-
-# -- celery-retry-no-exc --------------------------------------------------
 
 
 def test_retry_no_exc():
@@ -61,9 +55,6 @@ def fetch(self, url):
     assert not any(d.rule == "celery-retry-no-exc" for d in diags)
 
 
-# -- celery-broad-autoretry ------------------------------------------------
-
-
 def test_broad_autoretry():
     source = """
 @app.task(autoretry_for=(Exception,))
@@ -82,9 +73,6 @@ def process(data):
 """
     diags = _run(source)
     assert not any(d.rule == "celery-broad-autoretry" for d in diags)
-
-
-# -- celery-direct-call ----------------------------------------------------
 
 
 def test_direct_call():

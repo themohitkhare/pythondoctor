@@ -5,9 +5,6 @@ def _run(source: str) -> list:
     return PytestRules().check(source, "test_app.py")
 
 
-# -- pytest-assert-tuple --------------------------------------------------
-
-
 def test_assert_tuple_detected():
     diags = _run("assert(x > 0, 'must be positive')")
     assert any(d.rule == "pytest-assert-tuple" for d in diags)
@@ -16,9 +13,6 @@ def test_assert_tuple_detected():
 def test_assert_tuple_ok():
     diags = _run("assert x > 0, 'must be positive'")
     assert not any(d.rule == "pytest-assert-tuple" for d in diags)
-
-
-# -- pytest-raises-instead-of-try -----------------------------------------
 
 
 def test_raises_instead_of_try_detected():
@@ -44,9 +38,6 @@ def test_division():
 """
     diags = _run(source)
     assert not any(d.rule == "pytest-raises-instead-of-try" for d in diags)
-
-
-# -- pytest-float-equality ------------------------------------------------
 
 
 def test_float_equality_detected():

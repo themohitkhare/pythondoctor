@@ -72,9 +72,6 @@ class CeleryRules(BaseRules):
                 diags.extend(self._check_broad_autoretry(node, call, filename))
         return diags
 
-    # ------------------------------------------------------------------
-    # Rule: celery-missing-bind
-    # ------------------------------------------------------------------
     def _check_missing_bind(self, func_node, decorator, filename) -> list[Diagnostic]:
         args = func_node.args
         first_arg = args.args[0].arg if args.args else None
@@ -102,9 +99,6 @@ class CeleryRules(BaseRules):
             )
         ]
 
-    # ------------------------------------------------------------------
-    # Rule: celery-retry-no-exc
-    # ------------------------------------------------------------------
     def _check_retry_no_exc(self, handler: ast.ExceptHandler, filename: str) -> list[Diagnostic]:
         diags: list[Diagnostic] = []
         for node in ast.walk(handler):
@@ -129,9 +123,6 @@ class CeleryRules(BaseRules):
                         )
         return diags
 
-    # ------------------------------------------------------------------
-    # Rule: celery-broad-autoretry
-    # ------------------------------------------------------------------
     def _check_broad_autoretry(self, func_node, call: ast.Call, filename: str) -> list[Diagnostic]:
         for kw in call.keywords:
             if kw.arg != "autoretry_for":
@@ -154,9 +145,6 @@ class CeleryRules(BaseRules):
                         ]
         return []
 
-    # ------------------------------------------------------------------
-    # Rule: celery-direct-call
-    # ------------------------------------------------------------------
     def _check_direct_call(
         self, node: ast.Call, task_names: set[str], filename: str
     ) -> list[Diagnostic]:

@@ -33,10 +33,6 @@ class PydanticRules(BaseRules):
                 diags.extend(self._check_validator_no_classmethod(node, filename))
         return diags
 
-    # ------------------------------------------------------------------
-    # Rule 1: pydantic-optional-no-default
-    # ------------------------------------------------------------------
-
     def _check_optional_no_default(self, cls: ast.ClassDef, filename: str) -> list[Diagnostic]:
         diags: list[Diagnostic] = []
         for node in cls.body:
@@ -78,10 +74,6 @@ class PydanticRules(BaseRules):
             ):
                 return True
         return False
-
-    # ------------------------------------------------------------------
-    # Rule 2: pydantic-validator-no-return
-    # ------------------------------------------------------------------
 
     def _check_validator_no_return(self, cls: ast.ClassDef, filename: str) -> list[Diagnostic]:
         diags: list[Diagnostic] = []
@@ -131,10 +123,6 @@ class PydanticRules(BaseRules):
                 return True
         return False
 
-    # ------------------------------------------------------------------
-    # Rule 3: pydantic-v1-validator (import form)
-    # ------------------------------------------------------------------
-
     def _check_v1_validator_import(self, tree: ast.Module, filename: str) -> list[Diagnostic]:
         diags: list[Diagnostic] = []
         for node in ast.walk(tree):
@@ -155,10 +143,6 @@ class PydanticRules(BaseRules):
                             )
                         )
         return diags
-
-    # ------------------------------------------------------------------
-    # Rule 3 (decorator form): pydantic-v1-validator
-    # ------------------------------------------------------------------
 
     def _check_v1_validator_decorator(self, cls: ast.ClassDef, filename: str) -> list[Diagnostic]:
         diags: list[Diagnostic] = []
@@ -187,10 +171,6 @@ class PydanticRules(BaseRules):
                     )
         return diags
 
-    # ------------------------------------------------------------------
-    # Rule 4: pydantic-v1-config
-    # ------------------------------------------------------------------
-
     def _check_v1_config(self, cls: ast.ClassDef, filename: str) -> list[Diagnostic]:
         diags: list[Diagnostic] = []
         for node in cls.body:
@@ -209,10 +189,6 @@ class PydanticRules(BaseRules):
                     )
                 )
         return diags
-
-    # ------------------------------------------------------------------
-    # Rule 5: pydantic-init-override
-    # ------------------------------------------------------------------
 
     def _check_init_override(self, cls: ast.ClassDef, filename: str) -> list[Diagnostic]:
         diags: list[Diagnostic] = []
@@ -249,10 +225,6 @@ class PydanticRules(BaseRules):
                 ):
                     return True
         return False
-
-    # ------------------------------------------------------------------
-    # Rule 6: pydantic-validator-no-classmethod
-    # ------------------------------------------------------------------
 
     def _check_validator_no_classmethod(self, cls: ast.ClassDef, filename: str) -> list[Diagnostic]:
         diags: list[Diagnostic] = []

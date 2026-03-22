@@ -22,10 +22,6 @@ class PytestRules(BaseRules):
         diags.extend(self._check_float_equality(tree, filename))
         return diags
 
-    # ------------------------------------------------------------------
-    # Rule 1: pytest-assert-tuple
-    # ------------------------------------------------------------------
-
     def _check_assert_tuple(self, tree: ast.Module, filename: str) -> list[Diagnostic]:
         """Detect ``assert(condition, msg)`` which is always True (non-empty tuple)."""
         diags: list[Diagnostic] = []
@@ -45,10 +41,6 @@ class PytestRules(BaseRules):
                     )
                 )
         return diags
-
-    # ------------------------------------------------------------------
-    # Rule 2: pytest-raises-instead-of-try
-    # ------------------------------------------------------------------
 
     def _check_raises_instead_of_try(self, tree: ast.Module, filename: str) -> list[Diagnostic]:
         """Detect try/except anti-patterns in test functions."""
@@ -106,10 +98,6 @@ class PytestRules(BaseRules):
 
     def _has_assert_false_else(self, try_node: ast.Try) -> bool:
         return any(self._is_assert_false(stmt) for stmt in try_node.orelse)
-
-    # ------------------------------------------------------------------
-    # Rule 3: pytest-float-equality
-    # ------------------------------------------------------------------
 
     def _check_float_equality(self, tree: ast.Module, filename: str) -> list[Diagnostic]:
         """Detect exact float comparisons inside test functions."""

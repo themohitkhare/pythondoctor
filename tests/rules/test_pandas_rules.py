@@ -5,9 +5,6 @@ def _run(source: str) -> list:
     return PandasRules().check(source, "analysis.py")
 
 
-# ------------------------------------------------------------------
-# pandas-chained-indexing
-# ------------------------------------------------------------------
 def test_chained_indexing():
     source = """
 df["A"][mask] = 99
@@ -24,9 +21,6 @@ df["A"] = 99
     assert not any(d.rule == "pandas-chained-indexing" for d in diags)
 
 
-# ------------------------------------------------------------------
-# pandas-inplace-assignment
-# ------------------------------------------------------------------
 def test_inplace_assignment():
     source = """
 df = df.drop(columns=['x'], inplace=True)
@@ -43,9 +37,6 @@ df.drop(columns=['x'], inplace=True)
     assert not any(d.rule == "pandas-inplace-assignment" for d in diags)
 
 
-# ------------------------------------------------------------------
-# pandas-nan-comparison
-# ------------------------------------------------------------------
 def test_nan_comparison():
     source = """
 result = df["col"] == np.nan

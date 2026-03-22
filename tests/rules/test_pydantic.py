@@ -5,9 +5,6 @@ def _run(source: str) -> list:
     return PydanticRules().check(source, "models.py")
 
 
-# ── Rule 1: pydantic-optional-no-default ──────────────────────────
-
-
 def test_optional_no_default_flagged():
     source = """
 from pydantic import BaseModel
@@ -58,9 +55,6 @@ class User(BaseModel):
     assert not any(d.rule == "pydantic-optional-no-default" for d in diags)
 
 
-# ── Rule 2: pydantic-validator-no-return ──────────────────────────
-
-
 def test_validator_no_return_flagged():
     source = """
 from pydantic import BaseModel, field_validator
@@ -92,9 +86,6 @@ class User(BaseModel):
 """
     diags = _run(source)
     assert not any(d.rule == "pydantic-validator-no-return" for d in diags)
-
-
-# ── Rule 3: pydantic-v1-validator ─────────────────────────────────
 
 
 def test_v1_validator_import_flagged():
@@ -129,9 +120,6 @@ class User(BaseModel):
     assert not any(d.rule == "pydantic-v1-validator" for d in diags)
 
 
-# ── Rule 4: pydantic-v1-config ────────────────────────────────────
-
-
 def test_v1_config_flagged():
     source = """
 from pydantic import BaseModel
@@ -156,9 +144,6 @@ class User(BaseModel):
 """
     diags = _run(source)
     assert not any(d.rule == "pydantic-v1-config" for d in diags)
-
-
-# ── Rule 5: pydantic-init-override ────────────────────────────────
 
 
 def test_init_override_no_super_flagged():
@@ -188,9 +173,6 @@ class User(BaseModel):
 """
     diags = _run(source)
     assert not any(d.rule == "pydantic-init-override" for d in diags)
-
-
-# ── Rule 6: pydantic-validator-no-classmethod ─────────────────────
 
 
 def test_field_validator_no_classmethod_flagged():

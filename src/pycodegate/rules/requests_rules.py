@@ -33,10 +33,6 @@ class RequestsRules(BaseRules):
                 diags.extend(self._check_no_status_check(node, filename))
         return diags
 
-    # ------------------------------------------------------------------
-    # Rule 1: http-missing-timeout
-    # ------------------------------------------------------------------
-
     def _is_http_call(self, node: ast.Call) -> bool:
         """Return True if the call is an HTTP method call (requests.get, etc.)."""
         if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
@@ -70,10 +66,6 @@ class RequestsRules(BaseRules):
                 cost=1.0,
             )
         ]
-
-    # ------------------------------------------------------------------
-    # Rule 2: http-no-status-check
-    # ------------------------------------------------------------------
 
     def _check_no_status_check(
         self, func_node: ast.FunctionDef | ast.AsyncFunctionDef, filename: str
@@ -140,10 +132,6 @@ class RequestsRules(BaseRules):
             and node.func.attr == attr
             and isinstance(node.func.value, ast.Name)
         )
-
-    # ------------------------------------------------------------------
-    # Rule 3: http-verify-disabled
-    # ------------------------------------------------------------------
 
     def _check_verify_disabled(self, node: ast.Call, filename: str) -> list[Diagnostic]:
         for kw in node.keywords:

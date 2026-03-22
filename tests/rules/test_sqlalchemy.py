@@ -5,9 +5,6 @@ def _run(source: str) -> list:
     return SQLAlchemyRules().check(source, "models.py")
 
 
-# -- sqla-sql-injection ------------------------------------------------
-
-
 def test_sql_injection_fstring():
     source = """
 from sqlalchemy import text
@@ -26,9 +23,6 @@ q = text("SELECT * FROM users WHERE id = :id")
     assert not any(d.rule == "sqla-sql-injection" for d in diags)
 
 
-# -- sqla-identity-compare ---------------------------------------------
-
-
 def test_identity_compare_is_none():
     source = """
 session.query(User).filter(User.name is None)
@@ -43,9 +37,6 @@ session.query(User).filter(User.name == None)
 """
     diags = _run(source)
     assert not any(d.rule == "sqla-identity-compare" for d in diags)
-
-
-# -- sqla-mutable-default ----------------------------------------------
 
 
 def test_mutable_default_list_literal():
@@ -64,9 +55,6 @@ tags = Column(JSON, default=list)
 """
     diags = _run(source)
     assert not any(d.rule == "sqla-mutable-default" for d in diags)
-
-
-# -- sqla-len-all -------------------------------------------------------
 
 
 def test_len_all_flagged():

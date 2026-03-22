@@ -22,9 +22,6 @@ class PandasRules(BaseRules):
         diags.extend(self._check_nan_comparison(tree, filename))
         return diags
 
-    # ------------------------------------------------------------------
-    # pandas-chained-indexing
-    # ------------------------------------------------------------------
     def _check_chained_indexing(self, tree: ast.Module, filename: str) -> list[Diagnostic]:
         results: list[Diagnostic] = []
         for node in ast.walk(tree):
@@ -47,9 +44,6 @@ class PandasRules(BaseRules):
                     )
         return results
 
-    # ------------------------------------------------------------------
-    # pandas-inplace-assignment
-    # ------------------------------------------------------------------
     def _check_inplace_assignment(self, tree: ast.Module, filename: str) -> list[Diagnostic]:
         results: list[Diagnostic] = []
         for node in ast.walk(tree):
@@ -80,9 +74,6 @@ class PandasRules(BaseRules):
                     break
         return results
 
-    # ------------------------------------------------------------------
-    # pandas-nan-comparison
-    # ------------------------------------------------------------------
     def _check_nan_comparison(self, tree: ast.Module, filename: str) -> list[Diagnostic]:
         results: list[Diagnostic] = []
         for node in ast.walk(tree):

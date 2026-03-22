@@ -5,9 +5,6 @@ def _run(source: str) -> list:
     return NumpyRules().check(source, "analysis.py")
 
 
-# ------------------------------------------------------------------
-# numpy-array-equality
-# ------------------------------------------------------------------
 def test_array_equality_in_if():
     source = """
 import numpy as np
@@ -34,9 +31,6 @@ if np.array_equal(a, b):
     assert not any(d.rule == "numpy-array-equality" for d in diags)
 
 
-# ------------------------------------------------------------------
-# numpy-builtin-on-array
-# ------------------------------------------------------------------
 def test_builtin_sum_on_array():
     source = """
 import numpy as np
@@ -57,9 +51,6 @@ total = np.sum(np.array([1, 2, 3]))
     assert not any(d.rule == "numpy-builtin-on-array" for d in diags)
 
 
-# ------------------------------------------------------------------
-# numpy-nan-in-int-array
-# ------------------------------------------------------------------
 def test_nan_in_int_array():
     source = """
 import numpy as np

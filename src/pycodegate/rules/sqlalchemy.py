@@ -44,10 +44,6 @@ class SQLAlchemyRules(BaseRules):
                 diags.extend(self._check_len_all(node, filename))
         return diags
 
-    # ------------------------------------------------------------------
-    # sqla-sql-injection
-    # ------------------------------------------------------------------
-
     def _check_sql_injection(self, node: ast.Call, filename: str) -> list[Diagnostic]:
         # Match .execute() or text()
         is_execute = isinstance(node.func, ast.Attribute) and node.func.attr == "execute"
@@ -71,10 +67,6 @@ class SQLAlchemyRules(BaseRules):
                 cost=3.0,
             )
         ]
-
-    # ------------------------------------------------------------------
-    # sqla-identity-compare
-    # ------------------------------------------------------------------
 
     def _check_identity_compare(self, node: ast.Call, filename: str) -> list[Diagnostic]:
         if not (isinstance(node.func, ast.Attribute) and node.func.attr in {"filter", "where"}):
@@ -105,10 +97,6 @@ class SQLAlchemyRules(BaseRules):
                 )
         return results
 
-    # ------------------------------------------------------------------
-    # sqla-mutable-default
-    # ------------------------------------------------------------------
-
     def _check_mutable_default(self, node: ast.Call, filename: str) -> list[Diagnostic]:
         if not (isinstance(node.func, ast.Name) and node.func.id in {"Column", "mapped_column"}):
             return []
@@ -128,10 +116,6 @@ class SQLAlchemyRules(BaseRules):
                     )
                 ]
         return []
-
-    # ------------------------------------------------------------------
-    # sqla-len-all
-    # ------------------------------------------------------------------
 
     def _check_len_all(self, node: ast.Call, filename: str) -> list[Diagnostic]:
         if not (isinstance(node.func, ast.Name) and node.func.id == "len"):
