@@ -33,6 +33,9 @@ class SecurityRules(BaseRules):
         diags.extend(self._check_yaml(tree, filename))
         diags.extend(self._check_hardcoded_secrets(tree, filename))
         diags.extend(self._check_weak_hash(tree, filename))
+        diags.extend(self._check_os_system(tree, filename))
+        diags.extend(self._check_subprocess_shell(tree, filename))
+        diags.extend(self._check_tempfile_mktemp(tree, filename))
         return diags
 
     def _check_eval_exec(self, tree: ast.Module, filename: str) -> list[Diagnostic]:
@@ -140,6 +143,97 @@ class SecurityRules(BaseRules):
                             cost=3.0,
                         )
                     )
+        return diags
+
+    def _check_os_system(self, tree: ast.Module, filename: str) -> list[Diagnostic]:
+        diags: list[Diagnostic] = []
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            if not isinstance(node.func, ast.Attribute):
+                continue
+            if node.func.attr != "system":
+                continue
+            if not isinstance(node.func.value, ast.Name):
+                continue
+            if node.func.value.id != "os":
+                continue
+            diags.append(
+                Diagnostic(
+                    file_path=filename,
+                    rule="no-os-system",
+                    severity=Severity.ERROR,
+                    category=Category.SECURITY,
+                    message="os.system() is vulnerable to shell injection",
+                    help="Use subprocess.run() with a list of arguments instead",
+                    line=node.lineno,
+                    column=node.col_offset,
+                    cost=4.0,
+                )
+            )
+        return diags
+
+    def _check_subprocess_shell(self, tree: ast.Module, filename: str) -> list[Diagnostic]:
+        _subprocess_funcs = {"run", "Popen", "call", "check_call", "check_output"}
+        diags: list[Diagnostic] = []
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            if not isinstance(node.func, ast.Attribute):
+                continue
+            if node.func.attr not in _subprocess_funcs:
+                continue
+            if not isinstance(node.func.value, ast.Name):
+                continue
+            if node.func.value.id != "subprocess":
+                continue
+            shell_true = any(
+                kw.arg == "shell" and isinstance(kw.value, ast.Constant) and kw.value.value is True
+                for kw in node.keywords
+            )
+            if not shell_true:
+                continue
+            diags.append(
+                Diagnostic(
+                    file_path=filename,
+                    rule="no-subprocess-shell",
+                    severity=Severity.ERROR,
+                    category=Category.SECURITY,
+                    message="subprocess called with shell=True is a security risk",
+                    help="Pass arguments as a list and remove shell=True",
+                    line=node.lineno,
+                    column=node.col_offset,
+                    cost=4.0,
+                )
+            )
+        return diags
+
+    def _check_tempfile_mktemp(self, tree: ast.Module, filename: str) -> list[Diagnostic]:
+        diags: list[Diagnostic] = []
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            if not isinstance(node.func, ast.Attribute):
+                continue
+            if node.func.attr != "mktemp":
+                continue
+            if not isinstance(node.func.value, ast.Name):
+                continue
+            if node.func.value.id != "tempfile":
+                continue
+            diags.append(
+                Diagnostic(
+                    file_path=filename,
+                    rule="no-tempfile-race",
+                    severity=Severity.WARNING,
+                    category=Category.SECURITY,
+                    message="tempfile.mktemp() is deprecated and vulnerable to race conditions",
+                    help="Use tempfile.mkstemp() or tempfile.NamedTemporaryFile()",
+                    line=node.lineno,
+                    column=node.col_offset,
+                    cost=2.0,
+                )
+            )
         return diags
 
     def _check_weak_hash(self, tree: ast.Module, filename: str) -> list[Diagnostic]:

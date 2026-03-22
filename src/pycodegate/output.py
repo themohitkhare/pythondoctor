@@ -213,6 +213,68 @@ def output_json(result: ScanResult) -> None:
     sys.stdout.write(json.dumps(payload, indent=2) + "\n")
 
 
+def _sarif_rules(diagnostics: list[Diagnostic]) -> list[dict]:
+    """Build SARIF rules registry from unique diagnostic rules."""
+    seen: dict[str, Diagnostic] = {}
+    for d in diagnostics:
+        if d.rule not in seen:
+            seen[d.rule] = d
+    return [
+        {
+            "id": rule_id,
+            "name": rule_id,
+            "shortDescription": {"text": diag.message},
+            "helpUri": "",
+            "help": {"text": diag.help},
+        }
+        for rule_id, diag in seen.items()
+    ]
+
+
+def _sarif_results(diagnostics: list[Diagnostic]) -> list[dict]:
+    """Build SARIF results array from diagnostics."""
+    return [
+        {
+            "ruleId": d.rule,
+            "level": "error" if d.severity == Severity.ERROR else "warning",
+            "message": {"text": d.message},
+            "locations": [
+                {
+                    "physicalLocation": {
+                        "artifactLocation": {"uri": d.file_path},
+                        "region": {
+                            "startLine": d.line,
+                            "startColumn": (d.column or 0) + 1,
+                        },
+                    }
+                }
+            ],
+        }
+        for d in diagnostics
+    ]
+
+
+def output_sarif(result: ScanResult) -> None:
+    """Output the scan result in SARIF 2.1.0 format for GitHub Code Scanning."""
+    sarif = {
+        "version": "2.1.0",
+        "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+        "runs": [
+            {
+                "tool": {
+                    "driver": {
+                        "name": "PyCodeGate",
+                        "version": __version__,
+                        "rules": _sarif_rules(result.diagnostics),
+                    }
+                },
+                "results": _sarif_results(result.diagnostics),
+            }
+        ],
+    }
+    sys.stdout.write(json.dumps(sarif, indent=2) + "\n")
+
+
 def _print_rule_details(
     console: Console,
     rule_diags: list[Diagnostic],

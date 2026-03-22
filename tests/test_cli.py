@@ -124,3 +124,14 @@ def test_ci_workflow(tmp_path):
     assert result.exit_code == 0
     assert "name: Py Gate Score" in result.output
     assert "pycodegate" in result.output
+
+
+def test_cli_sarif_output(tmp_path):
+    (tmp_path / "app.py").write_text("x = 1\n")
+    runner = CliRunner()
+    result = runner.invoke(main, [str(tmp_path), "--sarif"])
+    assert result.exit_code == 0
+    data = json.loads(result.output)
+    assert data["version"] == "2.1.0"
+    assert "runs" in data
+    assert data["runs"][0]["tool"]["driver"]["name"] == "PyCodeGate"

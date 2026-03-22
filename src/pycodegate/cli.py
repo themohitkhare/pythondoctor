@@ -9,7 +9,7 @@ import click
 
 from pycodegate import __version__
 from pycodegate.config import load_config
-from pycodegate.output import output_json, print_scan_result
+from pycodegate.output import output_json, output_sarif, print_scan_result
 from pycodegate.scan import scan_project
 from pycodegate.types import Severity
 from pycodegate.utils.badge import generate_badge, generate_ci_workflow
@@ -35,6 +35,7 @@ class CliOptions:
     ci_workflow: bool
     precommit: bool
     min_score: int | None
+    sarif_output: bool
 
 
 def _handle_early_exits(opts: CliOptions) -> bool:
@@ -81,7 +82,9 @@ def _output_result(opts: CliOptions, result) -> None:
         click.echo(generate_badge(result.score.value, result.score.label))
         return
 
-    if opts.json_output:
+    if opts.sarif_output:
+        output_sarif(result)
+    elif opts.json_output:
         output_json(result)
     elif opts.score_only:
         click.echo(str(result.score.value))
@@ -152,6 +155,13 @@ def _apply_exit_codes(opts: CliOptions, result) -> None:
     default=None,
     help="Minimum score threshold (exit 1 if below).",
 )
+@click.option(
+    "--sarif",
+    "sarif_output",
+    is_flag=True,
+    default=False,
+    help="Output in SARIF format for GitHub Code Scanning.",
+)
 def main(
     directory: str,
     lint: bool,
@@ -167,6 +177,7 @@ def main(
     ci_workflow: bool,
     precommit: bool,
     min_score: int | None,
+    sarif_output: bool,
 ) -> None:
     """PyCodeGate — Diagnose your Python project's health."""
     opts = CliOptions(
@@ -184,6 +195,7 @@ def main(
         ci_workflow=ci_workflow,
         precommit=precommit,
         min_score=min_score,
+        sarif_output=sarif_output,
     )
 
     if _handle_early_exits(opts):
