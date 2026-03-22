@@ -136,13 +136,11 @@ class PandasRules(BaseRules):
         ):
             return True
         # float('nan')
-        if (
+        return (
             isinstance(node, ast.Call)
             and isinstance(node.func, ast.Name)
             and node.func.id == "float"
             and len(node.args) == 1
             and isinstance(node.args[0], ast.Constant)
             and node.args[0].value == "nan"
-        ):
-            return True
-        return False
+        )

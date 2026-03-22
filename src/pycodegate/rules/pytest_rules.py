@@ -107,10 +107,7 @@ class PytestRules(BaseRules):
         return False
 
     def _has_assert_false_else(self, try_node: ast.Try) -> bool:
-        for stmt in try_node.orelse:
-            if self._is_assert_false(stmt):
-                return True
-        return False
+        return any(self._is_assert_false(stmt) for stmt in try_node.orelse)
 
     # ------------------------------------------------------------------
     # Rule 3: pytest-float-equality
@@ -149,7 +146,7 @@ class PytestRules(BaseRules):
             return False
         if not isinstance(node, ast.Compare):
             return False
-        for op, comparator in zip(node.ops, node.comparators):
+        for op, comparator in zip(node.ops, node.comparators):  # noqa: B905
             if isinstance(op, ast.Eq) and isinstance(comparator, ast.Constant) and isinstance(comparator.value, float):
                 return True
         return False
