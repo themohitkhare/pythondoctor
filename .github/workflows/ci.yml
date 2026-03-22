@@ -26,8 +26,8 @@ jobs:
       - name: Run tests
         run: uv run pytest --tb=short -q
 
-      - name: Run py-gate on itself
-        run: uv run py-gate . --fail-on error
+      - name: Run pycodegate on itself
+        run: uv run pycodegate . --fail-on error
 
   lint:
     runs-on: ubuntu-latest
