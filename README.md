@@ -313,9 +313,9 @@ uv run py-gate . --verbose  # dogfood it
 
 To add a new rule:
 
-1. Create a file in `src/python_doctor/rules/` extending `BaseRules`
+1. Create a file in `src/pycodegate/rules/` extending `BaseRules`
 2. Implement `check(self, source: str, filename: str) -> list[Diagnostic]`
-3. Register it in `src/python_doctor/rules/__init__.py`
+3. Register it in `src/pycodegate/rules/__init__.py`
 4. Add tests in `tests/rules/`
 
 ## License

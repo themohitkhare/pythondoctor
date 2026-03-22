@@ -1,7 +1,7 @@
 import json
 from unittest.mock import MagicMock, patch
 
-from python_doctor.rules.dependencies import DependencyRules
+from pycodegate.rules.dependencies import DependencyRules
 
 
 def test_no_pip_audit_returns_empty(tmp_path):

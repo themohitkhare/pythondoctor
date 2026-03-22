@@ -1,4 +1,4 @@
-from python_doctor.rules.architecture import ArchitectureRules
+from pycodegate.rules.architecture import ArchitectureRules
 
 
 def _run(source: str) -> list:

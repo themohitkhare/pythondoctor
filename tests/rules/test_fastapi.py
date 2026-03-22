@@ -1,4 +1,4 @@
-from python_doctor.rules.fastapi import FastAPIRules
+from pycodegate.rules.fastapi import FastAPIRules
 
 
 def _run(source: str) -> list:

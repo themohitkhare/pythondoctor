@@ -5,7 +5,7 @@ from __future__ import annotations
 import ast
 from abc import ABC, abstractmethod
 
-from python_doctor.types import Diagnostic
+from pycodegate.types import Diagnostic
 
 
 class BaseRules(ABC):

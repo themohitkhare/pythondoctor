@@ -5,8 +5,8 @@ from __future__ import annotations
 import ast
 import re
 
-from python_doctor.rules.base import BaseRules
-from python_doctor.types import Category, Diagnostic, Severity
+from pycodegate.rules.base import BaseRules
+from pycodegate.types import Category, Diagnostic, Severity
 
 _SQL_PATTERN = re.compile(
     r"(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER)\s+",

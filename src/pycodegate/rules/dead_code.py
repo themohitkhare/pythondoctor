@@ -9,7 +9,7 @@ try:
 except ImportError:
     vulture = None  # type: ignore[assignment]
 
-from python_doctor.types import Category, Diagnostic, Severity
+from pycodegate.types import Category, Diagnostic, Severity
 
 
 class DeadCodeRules:

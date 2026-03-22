@@ -5,7 +5,7 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 
-from python_doctor.utils.fixer import run_ruff_fix
+from pycodegate.utils.fixer import run_ruff_fix
 
 
 def test_run_ruff_fix_returns_int_on_temp_dir():

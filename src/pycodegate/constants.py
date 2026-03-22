@@ -1,6 +1,6 @@
 """Constants and thresholds for python-doctor."""
 
-from python_doctor.types import Category
+from pycodegate.types import Category
 
 # Score thresholds
 SCORE_GREAT = 75

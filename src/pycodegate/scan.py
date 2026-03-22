@@ -8,20 +8,20 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from python_doctor.discover import discover_project
-from python_doctor.profile import PROFILES, detect_profile
-from python_doctor.rules import get_all_rule_sets, get_framework_rules
-from python_doctor.rules.dead_code import DeadCodeRules
-from python_doctor.rules.dependencies import DependencyRules
-from python_doctor.rules.imports import ImportsRules
-from python_doctor.rules.structure import StructureRules
-from python_doctor.score import calculate_score
-from python_doctor.types import Diagnostic, ScanResult
-from python_doctor.utils.diff import get_changed_files
-from python_doctor.utils.file_discovery import find_python_files
+from pycodegate.discover import discover_project
+from pycodegate.profile import PROFILES, detect_profile
+from pycodegate.rules import get_all_rule_sets, get_framework_rules
+from pycodegate.rules.dead_code import DeadCodeRules
+from pycodegate.rules.dependencies import DependencyRules
+from pycodegate.rules.imports import ImportsRules
+from pycodegate.rules.structure import StructureRules
+from pycodegate.score import calculate_score
+from pycodegate.types import Diagnostic, ScanResult
+from pycodegate.utils.diff import get_changed_files
+from pycodegate.utils.file_discovery import find_python_files
 
 if TYPE_CHECKING:
-    from python_doctor.config import Config
+    from pycodegate.config import Config
 
 
 def scan_project(

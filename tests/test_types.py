@@ -1,4 +1,4 @@
-from python_doctor.types import Category, Diagnostic, ProjectInfo, ScanResult, Score, Severity
+from pycodegate.types import Category, Diagnostic, ProjectInfo, ScanResult, Score, Severity
 
 
 def test_diagnostic_creation():

@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from python_doctor._compat import tomllib
+from pycodegate._compat import tomllib
 
 
 @dataclass

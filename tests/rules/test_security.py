@@ -1,5 +1,5 @@
-from python_doctor.rules.security import SecurityRules
-from python_doctor.types import Severity
+from pycodegate.rules.security import SecurityRules
+from pycodegate.types import Severity
 
 
 def _run(source: str, filename: str = "app.py") -> list:

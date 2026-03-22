@@ -1,5 +1,5 @@
-from python_doctor.rules.complexity import ComplexityRules
-from python_doctor.types import Severity
+from pycodegate.rules.complexity import ComplexityRules
+from pycodegate.types import Severity
 
 
 def _run(source: str) -> list:

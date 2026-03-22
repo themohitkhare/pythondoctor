@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from python_doctor.constants import (
+from pycodegate.constants import (
     CATEGORY_WEIGHTS,
     FRAMEWORK_CATEGORY_MAP,
     LABEL_CRITICAL,
@@ -12,7 +12,7 @@ from python_doctor.constants import (
     LABEL_GREAT,
     LABEL_NEEDS_WORK,
 )
-from python_doctor.types import Diagnostic, Score
+from pycodegate.types import Diagnostic, Score
 
 
 def calculate_score(

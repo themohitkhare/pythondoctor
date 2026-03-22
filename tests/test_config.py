@@ -1,4 +1,4 @@
-from python_doctor.config import load_config
+from pycodegate.config import load_config
 
 
 def test_default_config_when_no_file(tmp_path):
@@ -10,7 +10,7 @@ def test_default_config_when_no_file(tmp_path):
     assert cfg.ignore_files == []
 
 
-def test_load_from_python_doctor_toml(tmp_path):
+def test_load_from_pycodegate_toml(tmp_path):
     toml_content = """
 [ignore]
 rules = ["no-eval", "no-exec"]
@@ -49,7 +49,7 @@ files = []
     assert cfg.fail_on == "none"
 
 
-def test_python_doctor_toml_takes_precedence(tmp_path):
+def test_pycodegate_toml_takes_precedence(tmp_path):
     (tmp_path / "py-gate.toml").write_text("""
 [options]
 verbose = true

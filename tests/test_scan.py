@@ -1,5 +1,5 @@
-from python_doctor.config import Config
-from python_doctor.scan import scan_project
+from pycodegate.config import Config
+from pycodegate.scan import scan_project
 
 
 def test_scan_clean_project(tmp_path):

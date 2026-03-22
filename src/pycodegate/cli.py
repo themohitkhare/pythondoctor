@@ -6,14 +6,14 @@ import sys
 
 import click
 
-from python_doctor import __version__
-from python_doctor.config import load_config
-from python_doctor.output import output_json, print_scan_result
-from python_doctor.scan import scan_project
-from python_doctor.types import Severity
-from python_doctor.utils.badge import generate_badge, generate_ci_workflow
-from python_doctor.utils.fixer import run_ruff_fix
-from python_doctor.utils.precommit import install_precommit_hook
+from pycodegate import __version__
+from pycodegate.config import load_config
+from pycodegate.output import output_json, print_scan_result
+from pycodegate.scan import scan_project
+from pycodegate.types import Severity
+from pycodegate.utils.badge import generate_badge, generate_ci_workflow
+from pycodegate.utils.fixer import run_ruff_fix
+from pycodegate.utils.precommit import install_precommit_hook
 
 
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})

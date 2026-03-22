@@ -7,7 +7,7 @@ import os
 from collections import defaultdict
 from pathlib import Path
 
-from python_doctor.types import Category, Diagnostic, Severity
+from pycodegate.types import Category, Diagnostic, Severity
 
 
 class ImportsRules:

@@ -2,13 +2,13 @@ from io import StringIO
 
 from rich.console import Console
 
-from python_doctor.output import (
+from pycodegate.output import (
     format_doctor_face,
     format_score_bar,
     format_summary,
     print_scan_result,
 )
-from python_doctor.types import (
+from pycodegate.types import (
     Category,
     Diagnostic,
     ProjectInfo,
@@ -51,7 +51,7 @@ def _capture_output(result: ScanResult, verbose: bool = False) -> str:
     buf = StringIO()
     console = Console(file=buf, highlight=False, markup=True, no_color=True)
     # Patch console into print_scan_result by monkey-patching module
-    import python_doctor.output as output_mod
+    import pycodegate.output as output_mod
 
     original_console_cls = output_mod.Console
 

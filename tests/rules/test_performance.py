@@ -1,4 +1,4 @@
-from python_doctor.rules.performance import PerformanceRules
+from pycodegate.rules.performance import PerformanceRules
 
 
 def _run(source: str) -> list:

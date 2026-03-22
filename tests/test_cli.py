@@ -2,7 +2,7 @@ import json
 
 from click.testing import CliRunner
 
-from python_doctor.cli import main
+from pycodegate.cli import main
 
 
 def test_cli_help():

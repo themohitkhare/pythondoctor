@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import ast
 
-from python_doctor.rules.base import BaseRules
-from python_doctor.types import Category, Diagnostic, Severity
+from pycodegate.rules.base import BaseRules
+from pycodegate.types import Category, Diagnostic, Severity
 
 
 class PerformanceRules(BaseRules):

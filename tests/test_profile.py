@@ -10,7 +10,7 @@ import pytest
 if TYPE_CHECKING:
     from pathlib import Path
 
-from python_doctor.profile import PROFILES, Profile, detect_profile
+from pycodegate.profile import PROFILES, Profile, detect_profile
 
 
 @pytest.fixture()

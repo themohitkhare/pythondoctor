@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from python_doctor.types import Category, Diagnostic, Severity
+from pycodegate.types import Category, Diagnostic, Severity
 
 
 class DependencyRules:

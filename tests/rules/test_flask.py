@@ -1,4 +1,4 @@
-from python_doctor.rules.flask import FlaskRules
+from pycodegate.rules.flask import FlaskRules
 
 
 def _run(source: str, filename: str = "app.py") -> list:

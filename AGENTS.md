@@ -20,7 +20,7 @@ The JSON output includes the score, label, per-diagnostic severity and file loca
 
 - MUST: Use `uv` for all Python operations. `uv run` to execute, `uv sync` to install.
 - MUST: Follow existing code patterns — AST-based rule checks extending `BaseRules`.
-- MUST: Keep all types in `src/python_doctor/types.py`.
+- MUST: Keep all types in `src/pycodegate/types.py`.
 - MUST: Use dataclasses (frozen) for data containers.
 - MUST: Never comment unless absolutely necessary.
   - If the code is a hack, prefix with `# HACK: reason`
@@ -43,15 +43,15 @@ uv run py-gate . --verbose                   # dogfood on ourselves
 
 ## Adding Rules
 
-1. Create a new file in `src/python_doctor/rules/` extending `BaseRules`
+1. Create a new file in `src/pycodegate/rules/` extending `BaseRules`
 2. Implement `check(self, source: str, filename: str) -> list[Diagnostic]`
-3. Register in `src/python_doctor/rules/__init__.py`
+3. Register in `src/pycodegate/rules/__init__.py`
 4. Add tests in `tests/rules/`
 
 ## Architecture
 
 ```
-src/python_doctor/
+src/pycodegate/
   cli.py          — Click CLI entry point
   api.py          — Programmatic API (diagnose function)
   scan.py         — Orchestrator: parallel lint + dead code

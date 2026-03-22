@@ -5,9 +5,9 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from python_doctor._compat import tomllib
-from python_doctor.types import ProjectInfo
-from python_doctor.utils.file_discovery import find_python_files
+from pycodegate._compat import tomllib
+from pycodegate.types import ProjectInfo
+from pycodegate.utils.file_discovery import find_python_files
 
 
 def discover_project(project_path: str) -> ProjectInfo:

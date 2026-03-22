@@ -5,8 +5,8 @@ from __future__ import annotations
 import ast
 import re
 
-from python_doctor.rules.base import BaseRules
-from python_doctor.types import Category, Diagnostic, Severity
+from pycodegate.rules.base import BaseRules
+from pycodegate.types import Category, Diagnostic, Severity
 
 # Patterns that suggest a hardcoded secret
 _SECRET_VAR_PATTERNS = re.compile(

@@ -1,4 +1,4 @@
-from python_doctor.rules.django import DjangoRules
+from pycodegate.rules.django import DjangoRules
 
 
 def _run(source: str, filename: str = "views.py") -> list:

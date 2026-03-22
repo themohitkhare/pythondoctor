@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from python_doctor.rules.imports import ImportsRules
+from pycodegate.rules.imports import ImportsRules
 
 
 def test_circular_import_detected(tmp_path):

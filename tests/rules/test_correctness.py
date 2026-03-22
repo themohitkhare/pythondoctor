@@ -1,4 +1,4 @@
-from python_doctor.rules.correctness import CorrectnessRules
+from pycodegate.rules.correctness import CorrectnessRules
 
 
 def _run(source: str) -> list:

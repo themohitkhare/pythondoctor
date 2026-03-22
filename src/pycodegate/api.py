@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from python_doctor.config import load_config
-from python_doctor.scan import scan_project
+from pycodegate.config import load_config
+from pycodegate.scan import scan_project
 
 if TYPE_CHECKING:
-    from python_doctor.types import ScanResult
+    from pycodegate.types import ScanResult
 
 
 def diagnose(

@@ -10,9 +10,9 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
 
-from python_doctor import __version__
-from python_doctor.constants import CATEGORY_WEIGHTS, FRAMEWORK_CATEGORY_MAP
-from python_doctor.types import Category, Diagnostic, ScanResult, Severity
+from pycodegate import __version__
+from pycodegate.constants import CATEGORY_WEIGHTS, FRAMEWORK_CATEGORY_MAP
+from pycodegate.types import Category, Diagnostic, ScanResult, Severity
 
 BAR_WIDTH = 50
 

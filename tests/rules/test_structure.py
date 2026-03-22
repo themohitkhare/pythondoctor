@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from python_doctor.rules.structure import StructureRules
-from python_doctor.types import Category
+from pycodegate.rules.structure import StructureRules
+from pycodegate.types import Category
 
 
 def test_large_file(tmp_path):

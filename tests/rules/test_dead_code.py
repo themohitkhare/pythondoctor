@@ -1,5 +1,5 @@
-from python_doctor.rules.dead_code import DeadCodeRules
-from python_doctor.types import Category
+from pycodegate.rules.dead_code import DeadCodeRules
+from pycodegate.types import Category
 
 
 def test_detects_unused_function(tmp_path):

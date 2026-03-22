@@ -1,8 +1,8 @@
 import tempfile
 from pathlib import Path
 
-from python_doctor.config import Config
-from python_doctor.scan import scan_project
+from pycodegate.config import Config
+from pycodegate.scan import scan_project
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
