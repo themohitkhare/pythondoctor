@@ -16,6 +16,7 @@ class Config:
     fail_on: str = "none"
     ignore_rules: list[str] = field(default_factory=list)
     ignore_files: list[str] = field(default_factory=list)
+    profile: str | None = None
 
 
 def load_config(project_path: str) -> Config:
@@ -49,6 +50,7 @@ def _parse_doctor_toml(path: Path) -> Config:
         fail_on=options.get("fail_on", "none"),
         ignore_rules=ignore.get("rules", []),
         ignore_files=ignore.get("files", []),
+        profile=options.get("profile", None),
     )
 
 
@@ -69,4 +71,5 @@ def _parse_pyproject_toml(path: Path) -> Config:
         fail_on=section.get("fail_on", "none"),
         ignore_rules=ignore.get("rules", []),
         ignore_files=ignore.get("files", []),
+        profile=section.get("profile", None),
     )

@@ -9,8 +9,10 @@ from python_doctor.rules.correctness import CorrectnessRules
 from python_doctor.rules.django import DjangoRules
 from python_doctor.rules.fastapi import FastAPIRules
 from python_doctor.rules.flask import FlaskRules
+from python_doctor.rules.imports import ImportsRules as ImportsRules
 from python_doctor.rules.performance import PerformanceRules
 from python_doctor.rules.security import SecurityRules
+from python_doctor.rules.structure import StructureRules as StructureRules
 
 
 def get_all_rule_sets() -> list[BaseRules]:

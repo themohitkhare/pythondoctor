@@ -38,6 +38,13 @@ from python_doctor.utils.fixer import run_ruff_fix
     help="Exit with code 1 on this severity level.",
 )
 @click.option("--fix", "fix", is_flag=True, default=False, help="Auto-fix issues via ruff.")
+@click.option(
+    "--profile",
+    "profile_override",
+    type=click.Choice(["cli", "web", "library", "script"]),
+    default=None,
+    help="Override auto-detected project profile.",
+)
 def main(
     directory: str,
     lint: bool,
@@ -48,6 +55,7 @@ def main(
     diff_base: str | None,
     fail_on: str,
     fix: bool,
+    profile_override: str | None,
 ) -> None:
     """Py Gate — Diagnose your Python project's health."""
     if fix:
@@ -62,6 +70,8 @@ def main(
     config.dead_code = dead_code
     config.verbose = verbose
     config.fail_on = fail_on
+    if profile_override is not None:
+        config.profile = profile_override
 
     result = scan_project(directory, config, diff_base=diff_base)
 

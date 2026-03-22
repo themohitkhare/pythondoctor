@@ -9,8 +9,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from python_doctor.discover import discover_project
+from python_doctor.profile import PROFILES, detect_profile
 from python_doctor.rules import get_all_rule_sets, get_framework_rules
 from python_doctor.rules.dead_code import DeadCodeRules
+from python_doctor.rules.imports import ImportsRules
 from python_doctor.score import calculate_score
 from python_doctor.types import Diagnostic, ScanResult
 from python_doctor.utils.diff import get_changed_files
@@ -28,10 +30,17 @@ def scan_project(
     """Run full scan and return results."""
     start = time.monotonic()
     project = discover_project(project_path)
+
+    # Resolve profile: config/CLI override takes precedence over auto-detection
+    if config.profile and config.profile in PROFILES:
+        profile = PROFILES[config.profile]
+    else:
+        profile = detect_profile(project_path)
+
     files = _resolve_files(project_path, diff_base)
     all_diags = _run_checks(files, project.framework, project_path, config)
-    all_diags = _apply_filters(all_diags, config, project_path)
-    score = calculate_score(all_diags)
+    all_diags = _apply_filters(all_diags, config, project_path, profile.suppressed_rules)
+    score = calculate_score(all_diags, max_deduction_overrides=profile.max_deduction_overrides)
     elapsed = int((time.monotonic() - start) * 1000)
 
     return ScanResult(
@@ -57,27 +66,34 @@ def _run_checks(
     project_path: str,
     config: Config,
 ) -> list[Diagnostic]:
-    """Run lint + dead code in parallel."""
-    with ThreadPoolExecutor(max_workers=2) as executor:
+    """Run lint + dead code + imports checks in parallel."""
+    str_files = [str(f) for f in files]
+    with ThreadPoolExecutor(max_workers=3) as executor:
         lint_future = executor.submit(_run_lint, files, framework, config) if config.lint else None
         dead_code_future = (
             executor.submit(_run_dead_code, project_path, config) if config.dead_code else None
         )
+        imports_future = executor.submit(_run_imports, project_path, str_files)
 
         lint_diags = lint_future.result() if lint_future else []
         dead_code_diags = dead_code_future.result() if dead_code_future else []
+        imports_diags = imports_future.result()
 
-    return lint_diags + dead_code_diags
+    return lint_diags + dead_code_diags + imports_diags
 
 
 def _apply_filters(
     diags: list[Diagnostic],
     config: Config,
     project_path: str = ".",
+    suppressed_rules: frozenset[str] | None = None,
 ) -> list[Diagnostic]:
-    """Apply ignore_rules and ignore_files filters."""
-    if config.ignore_rules:
-        diags = [d for d in diags if d.rule not in config.ignore_rules]
+    """Apply ignore_rules, profile suppressed_rules, and ignore_files filters."""
+    combined_ignore = set(config.ignore_rules)
+    if suppressed_rules:
+        combined_ignore |= suppressed_rules
+    if combined_ignore:
+        diags = [d for d in diags if d.rule not in combined_ignore]
     if config.ignore_files:
         root = Path(project_path).resolve()
         diags = [d for d in diags if not _matches_ignore(d.file_path, config.ignore_files, root)]
@@ -119,3 +135,8 @@ def _run_lint(
 def _run_dead_code(project_path: str, config: Config) -> list[Diagnostic]:
     """Run dead code detection."""
     return DeadCodeRules().check_project(project_path)
+
+
+def _run_imports(project_path: str, source_files: list[str]) -> list[Diagnostic]:
+    """Run circular import detection."""
+    return ImportsRules().check_project(project_path, source_files)
